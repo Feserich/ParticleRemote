@@ -42,9 +42,6 @@ public class MainActivity extends AppCompatActivity {
     private List<io.particle.android.sdk.cloud.ParticleDevice> availableDevices;
     private io.particle.android.sdk.cloud.ParticleDevice selectedDevice;
 
-    //check if this appear after commit
-    //successfully after merge
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
