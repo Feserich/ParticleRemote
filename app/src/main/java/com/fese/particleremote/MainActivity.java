@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     private io.particle.android.sdk.cloud.ParticleDevice selectedDevice;
 
     //check if this appear after commit
+    //test commit
 
 
     @Override
