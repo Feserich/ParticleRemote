@@ -5,13 +5,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toolbar;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.logging.Handler;
 
 import io.particle.android.sdk.cloud.*;
 import io.particle.android.sdk.cloud.ParticleDevice;
