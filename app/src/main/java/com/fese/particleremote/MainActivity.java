@@ -210,7 +210,6 @@ public void AutoLogin(final String email, final String password) {
 
 
         Async.executeAsync(ParticleCloudSDK.getCloud(), new Async.ApiWork<ParticleCloud, Void>() {
-            @Override
             public Void callApi(ParticleCloud particleCloud) throws ParticleCloudException, IOException {
                 particleCloud.logOut();
                 return null;
@@ -234,7 +233,6 @@ public void AutoLogin(final String email, final String password) {
 
     public void loadParticleDeviceList() {
         Async.executeAsync(ParticleCloudSDK.getCloud(), new Async.ApiWork<ParticleCloud, List<io.particle.android.sdk.cloud.ParticleDevice>>() {
-            @Override
             public List<io.particle.android.sdk.cloud.ParticleDevice> callApi(ParticleCloud particleCloud) throws ParticleCloudException, IOException {
                 return particleCloud.getDevices();
             }
