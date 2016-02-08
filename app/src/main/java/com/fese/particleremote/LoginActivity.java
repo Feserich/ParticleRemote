@@ -1,0 +1,176 @@
+package com.fese.particleremote;
+
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+
+import android.content.Intent;
+import android.view.View;
+import android.view.View.OnKeyListener;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+import android.view.KeyEvent;
+
+
+import java.io.IOException;
+
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import io.particle.android.sdk.cloud.ParticleCloud;
+import io.particle.android.sdk.cloud.ParticleCloudException;
+import io.particle.android.sdk.utils.Async;
+import io.particle.android.sdk.utils.Toaster;
+
+
+public class LoginActivity extends AppCompatActivity {
+    private static final String TAG = "LoginActivity";
+
+    @InjectView(R.id.input_email) EditText _emailText;
+    @InjectView(R.id.input_password) EditText _passwordText;
+    @InjectView(R.id.btn_login) Button _loginButton;
+
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+
+        setContentView(R.layout.activity_login);
+        ButterKnife.inject(this);
+
+        _loginButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                login();
+            }
+        });
+
+        _passwordText.setOnKeyListener(new OnKeyListener() {
+            public boolean onKey(View view, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_ENTER) {
+                    login();
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        });
+
+    }
+
+    public void login() {
+        Log.d(TAG, "Login");
+
+        if (!validate()) {
+            onLoginFailed();
+            return;
+        }
+
+        _loginButton.setEnabled(false);
+
+        final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setMessage("Authenticating...");
+        progressDialog.show();
+
+        final String email = _emailText.getText().toString();
+        final String password = _passwordText.getText().toString();
+
+
+
+
+
+
+        Async.executeAsync(ParticleCloud.get(LoginActivity.this), new Async.ApiWork<ParticleCloud, Void>() {
+            public Void callApi(ParticleCloud particleCloud) throws ParticleCloudException, IOException {
+                particleCloud.logIn(email, password);
+                return null;
+            }
+
+            public void onSuccess(Void aVoid) {
+                Toaster.l(LoginActivity.this, "Logged in");
+
+                //store credentials
+                SharedPreferences mPrefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+                SharedPreferences.Editor prefsEditor = mPrefs.edit();
+                prefsEditor.putString("email", email);
+                prefsEditor.putString("password", password);
+                prefsEditor.commit();
+                //TODO: Use OAuth from Particle with a token
+                //TODO: Generate a Key and encrypt the password.
+                //TODO: Use SecurePreferences: https://github.com/scottyab/secure-preferences.git
+
+
+                // start new activity...
+                Intent intentMain = new Intent(LoginActivity.this, MainActivity.class);
+                LoginActivity.this.startActivity(intentMain);
+            }
+
+            public void onFailure(ParticleCloudException e) {
+                Log.e("SOME_TAG", e.getBestMessage());
+                Toaster.l(LoginActivity.this, "Wrong credentials or no internet connectivity, please try again");
+            }
+
+        });
+
+        new android.os.Handler().postDelayed(
+                new Runnable() {
+                    public void run() {
+                        // On complete call either onLoginSuccess or onLoginFailed
+                        onLoginSuccess();
+                        // onLoginFailed();
+                        progressDialog.dismiss();
+                    }
+                }, 3000);
+    }
+
+
+
+    @Override
+    public void onBackPressed() {
+        // disable going back to the MainActivity
+        moveTaskToBack(true);
+    }
+
+    public void onLoginSuccess() {
+        _loginButton.setEnabled(true);
+        finish();
+    }
+
+    public void onLoginFailed() {
+        Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
+
+        _loginButton.setEnabled(true);
+    }
+
+    public boolean validate() {
+        boolean valid = true;
+
+        String email = _emailText.getText().toString();
+        String password = _passwordText.getText().toString();
+
+        if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            _emailText.setError("enter a valid email address");
+            valid = false;
+        } else {
+            _emailText.setError(null);
+        }
+
+        if (password.isEmpty() || password.length() < 3 || password.length() > 12) {
+            _passwordText.setError("between 3 and 12 alphanumeric characters");
+            valid = false;
+        } else {
+            _passwordText.setError(null);
+        }
+
+        return valid;
+
+
+    }
+}
