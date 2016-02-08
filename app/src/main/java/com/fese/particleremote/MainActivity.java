@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     private io.particle.android.sdk.cloud.ParticleDevice selectedDevice;
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
                         if (CloudDevice.getID().equals(deviceID)) {
                             selectedDevice = CloudDevice;
                             startParticleFunctionDialog(deviceID);
-                        } else if (deviceID == "test device") {
+                        } else if (deviceID.equals("test device")) {
                             Toaster.l(MainActivity.this, "Selected device is a virtual test device!");
                         } else {
                             Toaster.l(MainActivity.this, "Error");
@@ -177,6 +178,7 @@ public class MainActivity extends AppCompatActivity {
 
 public void AutoLogin(final String email, final String password) {
         Async.executeAsync(ParticleCloudSDK.getCloud(), new Async.ApiWork<ParticleCloud, Void>() {
+
             public Void callApi(ParticleCloud particleCloud) throws ParticleCloudException, IOException {
                 particleCloud.logIn(email, password);
                 return null;
@@ -208,6 +210,7 @@ public void AutoLogin(final String email, final String password) {
 
 
         Async.executeAsync(ParticleCloudSDK.getCloud(), new Async.ApiWork<ParticleCloud, Void>() {
+            @Override
             public Void callApi(ParticleCloud particleCloud) throws ParticleCloudException, IOException {
                 particleCloud.logOut();
                 return null;
@@ -231,7 +234,7 @@ public void AutoLogin(final String email, final String password) {
 
     public void loadParticleDeviceList() {
         Async.executeAsync(ParticleCloudSDK.getCloud(), new Async.ApiWork<ParticleCloud, List<io.particle.android.sdk.cloud.ParticleDevice>>() {
-
+            @Override
             public List<io.particle.android.sdk.cloud.ParticleDevice> callApi(ParticleCloud particleCloud) throws ParticleCloudException, IOException {
                 return particleCloud.getDevices();
             }
