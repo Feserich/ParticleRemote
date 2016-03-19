@@ -139,7 +139,9 @@ public class MainActivity extends AppCompatActivity {
                                 MainActivity.this.startActivity(intentToggleLED);
                                 break;
                             case 1:
-                                Toaster.l(MainActivity.this, "Coming soon...");
+                                Intent intentRelay = new Intent(MainActivity.this, RelayActivity.class);
+                                intentRelay.putExtra("deviceID", deviceID);
+                                MainActivity.this.startActivity(intentRelay);
                                 break;
                             case 2:
                                 Intent intentTempHumi = new Intent(MainActivity.this, TempHumiActivity.class);
