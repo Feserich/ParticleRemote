@@ -17,4 +17,12 @@
     <string name="logout">logout</string>
     <string name="action_settings">action_settings</string>
     <string name="title_function_dialog_list">"Select Function"</string>
+    <string name="title_activity_relay_scrolling">RelayScrollingActivity</string>
+
+
+    <string-array name="DOPins">
+        <item>D0</item>
+        <item>D1</item>
+    </string-array>
+
 </resources>

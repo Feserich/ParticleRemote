@@ -54,8 +54,8 @@ public class MainActivity extends AppCompatActivity {
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.activity_main_swipe_refresh_layout);
         mSwipeRefreshLayout.setColorSchemeResources(R.color.colorAccent, R.color.blue, R.color.green);
         rv = (RecyclerView) findViewById(R.id.deviceList);
-        LinearLayoutManager llm = new LinearLayoutManager(this);
-        rv.setLayoutManager(llm);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        rv.setLayoutManager(linearLayoutManager);
 
         toolbar = (Toolbar) findViewById(R.id.app_bar);
         setActionBar(toolbar);
@@ -121,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
         ParticleFunctions[0] = "Toggle LED";
         ParticleFunctions[1] = "Switch Relays";
         ParticleFunctions[2] = "Read temperature & humidity";
-        ParticleFunctions[3] = "more coming soon...";
+        ParticleFunctions[3] = "Send IR-Signals";
     }
 
     //TODO: show hint if device is offline
@@ -139,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
                                 MainActivity.this.startActivity(intentToggleLED);
                                 break;
                             case 1:
-                                Intent intentRelay = new Intent(MainActivity.this, RelayActivity.class);
+                                Intent intentRelay = new Intent(MainActivity.this, RelayScrollingActivity.class);
                                 intentRelay.putExtra("deviceID", deviceID);
                                 MainActivity.this.startActivity(intentRelay);
                                 break;

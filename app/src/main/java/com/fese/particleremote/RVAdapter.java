@@ -11,10 +11,24 @@ import android.widget.TextView;
 
 import java.util.List;
 
-
 /**
  * Created by Fabia on 21.01.2016.
  */
+
+class ParticleDevice {
+    String deviceName;
+    String deviceID;
+    String model;
+    boolean isConnected;
+
+    ParticleDevice(String deviceName, String deviceID, String model, boolean isConnected) {
+        this.deviceName = deviceName;
+        this.deviceID = deviceID;
+        this.model = model;
+        this.isConnected = isConnected;
+    }
+}
+
 public class RVAdapter extends RecyclerView.Adapter<RVAdapter.DeviceViewHolder> {
 
 
@@ -44,11 +58,11 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.DeviceViewHolder> 
 
         DeviceViewHolder(View itemView) {
             super(itemView);
-            cv = (CardView) itemView.findViewById(R.id.cv);
+            cv = (CardView) itemView.findViewById(R.id.cv_device);
             deviceName = (TextView) itemView.findViewById(R.id.deviceName);
             deviceID = (TextView) itemView.findViewById(R.id.deviceID);
             model = (TextView) itemView.findViewById(R.id.model);
-            status = (TextView) itemView.findViewById(R.id.status);
+            status = (TextView) itemView.findViewById(R.id.deviceStatus);
             devicePhoto = (ImageView) itemView.findViewById(R.id.devicePhoto);
             statusLED = (ImageView) itemView.findViewById(R.id.statusLED);
             view = itemView;

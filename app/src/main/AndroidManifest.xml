@@ -35,7 +35,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
-        <activity android:name=".RelayActivity"></activity>
+        <activity
+            android:name=".RelayScrollingActivity"
+            android:label="@string/title_activity_relay_scrolling"
+            android:theme="@style/AppTheme"></activity>
     </application>
 
 </manifest>
