@@ -29,11 +29,19 @@
             android:textSize="25sp" />
 
         <TextView
+            android:id="@+id/pinText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/relayName"
+            android:text="Pin: "
+            android:layout_toEndOf="@+id/relayPhoto" />
+
+        <TextView
             android:id="@+id/relayPin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/relayName"
-            android:layout_toEndOf="@+id/relayPhoto" />
+            android:layout_toEndOf="@+id/pinText" />
 
 
         <TextView

@@ -102,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initializeAdapter() {
+        //TODO: notify the adapter instead of create a new adapter object each time new dataset is available
         RVAdapter adapter = new RVAdapter(RVdevices);
         rv.setAdapter(adapter);
         mSwipeRefreshLayout.setRefreshing(false);
@@ -253,6 +254,7 @@ public void AutoLogin(final String email, final String password) {
             public void onFailure(ParticleCloudException e) {
                 Log.e("SOME_TAG", e.getBestMessage());
                 Toaster.l(MainActivity.this, "No device found");
+                mSwipeRefreshLayout.setRefreshing(false);
             }
         });
 

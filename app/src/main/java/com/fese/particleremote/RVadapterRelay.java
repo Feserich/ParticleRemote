@@ -18,13 +18,15 @@ class Relay {
     String relayName;
     String pin;
     boolean isSwitched;
+    boolean switchConfirmation;
 
     //TODO: boolean confirmation Popup
 
-    Relay(String relayName, String pin, boolean isSwitched) {
+    Relay(String relayName, String pin, boolean isSwitched, boolean switchConfirmation) {
         this.relayName = relayName;
         this.pin = pin;
         this.isSwitched = isSwitched;
+        this.switchConfirmation = switchConfirmation;
     }
 }
 
@@ -59,6 +61,7 @@ public class RVadapterRelay extends RecyclerView.Adapter<RVadapterRelay.RelayVie
         relayViewHolder.relayName.setText(relays.get(position).relayName);
         relayViewHolder.relayPin.setText(relays.get(position).pin);
 
+
         if (relays.get(position).isSwitched){
             relayViewHolder.relayStatus.setText("Switched");
             //relayViewHolder.relayPhoto.setImageResource(R.drawable.relay_switched);
@@ -92,9 +95,6 @@ public class RVadapterRelay extends RecyclerView.Adapter<RVadapterRelay.RelayVie
         public static void setOnItemLongClickListener(OnItemLongClickListener l) {
             mItemLongClickListener = l;
         }
-
-
-
 
 
         public RelayViewHolder(View itemView) {
