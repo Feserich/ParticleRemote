@@ -215,11 +215,18 @@ public class RelayScrollingActivity extends AppCompatActivity {
                 return success;
             }
 
-            public void onSuccess(Integer onSuccess) {
-                if (onSuccess == 1) {
+            public void onSuccess(Integer returnValue) {
+                if (returnValue == 1) {
                     relay.isSwitched = (commandValue.equals("HIGH"));
                     recyclerView.getAdapter().notifyDataSetChanged();
                 }
+                else if (returnValue == -1){
+                    Toaster.l(RelayScrollingActivity.this, "Relay out of limit");
+                }
+                else if (returnValue == -2){
+                    Toaster.l(RelayScrollingActivity.this, "Wrong command");
+                }
+
 
             }
 
@@ -252,12 +259,12 @@ public class RelayScrollingActivity extends AppCompatActivity {
         final ArrayList<String> DOPinsSpinner = new ArrayList<String>();
         DOPinsSpinner.clear();
 
-        //D0 Pin is used by the DHT22
+        //D2 Pin is used by the DHT22
         //TODO: Option in settings to use the D0 pin
 
-        //DOPinsSpinner.add("D0");
+        DOPinsSpinner.add("D0");
         DOPinsSpinner.add("D1");
-        DOPinsSpinner.add("D2");
+        //DOPinsSpinner.add("D2");
         DOPinsSpinner.add("D3");
         DOPinsSpinner.add("D4");
         DOPinsSpinner.add("D5");
