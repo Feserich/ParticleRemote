@@ -165,6 +165,7 @@ public class RelayScrollingActivity extends AppCompatActivity {
 
 
     private void storeRelays (){
+        //TODO: store the listRelays for a specific device ID (so there aren't the same relay foreach device)
         SharedPreferences.Editor prefsEditor = relaySharedPref.edit();
         //transform the relay list to a string
         Gson gson = new Gson();
