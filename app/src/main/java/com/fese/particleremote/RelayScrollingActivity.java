@@ -190,6 +190,10 @@ public class RelayScrollingActivity extends AppCompatActivity {
     }
 
     private void toggleRelay(final Relay relay){
+
+        relay.tryToSwitch = true;
+        recyclerView.getAdapter().notifyDataSetChanged();
+
         Async.executeAsync(ParticleCloudSDK.getCloud(), new Async.ApiWork<ParticleCloud, Integer>() {
 
             @Override
@@ -211,6 +215,7 @@ public class RelayScrollingActivity extends AppCompatActivity {
 
                 } catch (io.particle.android.sdk.cloud.ParticleDevice.FunctionDoesNotExistException e) {
                     Toaster.l(RelayScrollingActivity.this, "Function doesn't exist!");
+                    relay.tryToSwitch = false;
                 }
 
                 return success;
@@ -219,22 +224,35 @@ public class RelayScrollingActivity extends AppCompatActivity {
             public void onSuccess(Integer returnValue) {
                 if (returnValue == 1) {
                     relay.isSwitched = (commandValue.equals("HIGH"));
-                    recyclerView.getAdapter().notifyDataSetChanged();
+                    relay.tryToSwitch = false;
+                    //recyclerView.getAdapter().notifyDataSetChanged();
                 }
                 else if (returnValue == -1){
+                    relay.tryToSwitch = false;
+                    //recyclerView.getAdapter().notifyDataSetChanged();
                     Toaster.l(RelayScrollingActivity.this, "Relay out of limit");
                 }
                 else if (returnValue == -2){
+                    relay.tryToSwitch = false;
+                    recyclerView.getAdapter().notifyDataSetChanged();
                     Toaster.l(RelayScrollingActivity.this, "Wrong command");
                 }
 
+                recyclerView.getAdapter().notifyDataSetChanged();
 
             }
 
             public void onFailure(ParticleCloudException e) {
+                relay.tryToSwitch = false;
                 Log.e("SOME_TAG", e.getBestMessage());
+                Toaster.l(RelayScrollingActivity.this, e.getBestMessage());
+                recyclerView.getAdapter().notifyDataSetChanged();
             }
+
+
         });
+
+
     }
 
 
@@ -296,7 +314,7 @@ public class RelayScrollingActivity extends AppCompatActivity {
                         editRelayName = relayName.getText().toString();
                         editSwitchConfirmation = confirmation.isChecked();
 
-                        listRelays.add(new Relay(editRelayName, editPin, false, editSwitchConfirmation));
+                        listRelays.add(new Relay(editRelayName, editPin, false, editSwitchConfirmation, false));
                         recyclerView.getAdapter().notifyDataSetChanged();
                         storeRelays();
                     }

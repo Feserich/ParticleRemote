@@ -18,13 +18,15 @@ class Relay {
     String relayName;
     String pin;
     boolean isSwitched;
+    boolean tryToSwitch;
     boolean switchConfirmation;
 
     //TODO: boolean confirmation Popup
 
-    Relay(String relayName, String pin, boolean isSwitched, boolean switchConfirmation) {
+    Relay(String relayName, String pin, boolean isSwitched, boolean switchConfirmation, boolean tryToSwitch) {
         this.relayName = relayName;
         this.pin = pin;
+        this.tryToSwitch = tryToSwitch;
         this.isSwitched = isSwitched;
         this.switchConfirmation = switchConfirmation;
     }
@@ -62,12 +64,17 @@ public class RVadapterRelay extends RecyclerView.Adapter<RVadapterRelay.RelayVie
         relayViewHolder.relayPin.setText(relays.get(position).pin);
 
 
-        if (relays.get(position).isSwitched){
+        if(relays.get(position).tryToSwitch){
+            relayViewHolder.relayStatus.setText("try to Switch");
+            relayViewHolder.relayPhoto.setImageResource(R.drawable.ic_led_off_grey600_48dp);
+        }
+        else if (relays.get(position).isSwitched){
             relayViewHolder.relayStatus.setText("Switched");
-            //relayViewHolder.relayPhoto.setImageResource(R.drawable.relay_switched);
+            relayViewHolder.relayPhoto.setImageResource(R.drawable.ic_led_on_grey600_48dp);
         }
         else {
             relayViewHolder.relayStatus.setText("Not switched");
+            relayViewHolder.relayPhoto.setImageResource(R.drawable.ic_led_variant_off_grey600_48dp);
         }
 
     }
