@@ -23,6 +23,7 @@ import android.widget.Spinner;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.google.common.primitives.Booleans;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -51,6 +52,7 @@ public class RelayScrollingActivity extends AppCompatActivity {
     private ParticleDevice myParticleDevice;
     private List<String> functionCommandList;
     private String commandValue;
+    private boolean relayIsSwitching;
 
 
 
@@ -189,68 +191,89 @@ public class RelayScrollingActivity extends AppCompatActivity {
         }
     }
 
+
+
     private void toggleRelay(final Relay relay){
 
-        relay.tryToSwitch = true;
-        recyclerView.getAdapter().notifyDataSetChanged();
+        relayIsSwitching = false;
+        for (Relay relayInList: listRelays) {
 
-        Async.executeAsync(ParticleCloudSDK.getCloud(), new Async.ApiWork<ParticleCloud, Integer>() {
-
-            @Override
-            public Integer callApi(ParticleCloud particleCloud) throws ParticleCloudException, IOException {
-                Integer success = 0;
-
-                //set the commandValue to the opposite of isSwitched
-                commandValue = (relay.isSwitched) ? "LOW" : "HIGH";
-                //the commands in functionCommandList will be executed by the Particle device
-                functionCommandList = new ArrayList<String>();
-                functionCommandList.add(relay.pin);
-                functionCommandList.add(commandValue);
-
-                particleCloud.getDevices();
-                myParticleDevice = particleCloud.getDevice(myParticleID);
-
-                try {
-                    success = myParticleDevice.callFunction("toggleRelay",functionCommandList);
-
-                } catch (io.particle.android.sdk.cloud.ParticleDevice.FunctionDoesNotExistException e) {
-                    Toaster.l(RelayScrollingActivity.this, "Function doesn't exist!");
-                    relay.tryToSwitch = false;
-                }
-
-                return success;
+            if (relayInList.tryToSwitch){
+                relayIsSwitching = true;
             }
 
-            public void onSuccess(Integer returnValue) {
-                if (returnValue == 1) {
-                    relay.isSwitched = (commandValue.equals("HIGH"));
-                    relay.tryToSwitch = false;
-                    //recyclerView.getAdapter().notifyDataSetChanged();
+        }
+
+        if (!relayIsSwitching){                 //only toggle if no other relay is currently switching
+
+            relay.tryToSwitch = true;
+            recyclerView.getAdapter().notifyDataSetChanged();
+
+            Async.executeAsync(ParticleCloudSDK.getCloud(), new Async.ApiWork<ParticleCloud, Integer>() {
+
+                @Override
+                public Integer callApi(ParticleCloud particleCloud) throws ParticleCloudException, IOException {
+                    Integer success = 0;
+
+                    //set the commandValue to the opposite of isSwitched
+                    commandValue = (relay.isSwitched) ? "LOW" : "HIGH";
+                    //the commands in functionCommandList will be executed by the Particle device
+                    functionCommandList = new ArrayList<String>();
+                    functionCommandList.add(relay.pin);
+                    functionCommandList.add(commandValue);
+
+                    particleCloud.getDevices();
+                    myParticleDevice = particleCloud.getDevice(myParticleID);
+
+                    try {
+                        success = myParticleDevice.callFunction("toggleRelay",functionCommandList);
+
+                    } catch (io.particle.android.sdk.cloud.ParticleDevice.FunctionDoesNotExistException e) {
+                        Toaster.l(RelayScrollingActivity.this, "Function doesn't exist!");
+                        relay.tryToSwitch = false;
+                    }
+
+                    return success;
                 }
-                else if (returnValue == -1){
-                    relay.tryToSwitch = false;
-                    //recyclerView.getAdapter().notifyDataSetChanged();
-                    Toaster.l(RelayScrollingActivity.this, "Relay out of limit");
-                }
-                else if (returnValue == -2){
-                    relay.tryToSwitch = false;
+
+
+                public void onSuccess(Integer returnValue) {
+                    if (returnValue == 1) {
+                        relay.isSwitched = (commandValue.equals("HIGH"));
+                        relay.tryToSwitch = false;
+                        //recyclerView.getAdapter().notifyDataSetChanged();
+                    }
+                    else if (returnValue == -1){
+                        relay.tryToSwitch = false;
+                        //recyclerView.getAdapter().notifyDataSetChanged();
+                        Toaster.l(RelayScrollingActivity.this, "Relay out of limit");
+                    }
+                    else if (returnValue == -2){
+                        relay.tryToSwitch = false;
+                        recyclerView.getAdapter().notifyDataSetChanged();
+                        Toaster.l(RelayScrollingActivity.this, "Wrong command");
+                    }
+
                     recyclerView.getAdapter().notifyDataSetChanged();
-                    Toaster.l(RelayScrollingActivity.this, "Wrong command");
+                    storeRelays();
+
                 }
 
-                recyclerView.getAdapter().notifyDataSetChanged();
+                public void onFailure(ParticleCloudException e) {
+                    relay.tryToSwitch = false;
+                    Log.e("SOME_TAG", e.getBestMessage());
+                    Toaster.l(RelayScrollingActivity.this, e.getBestMessage());
+                    recyclerView.getAdapter().notifyDataSetChanged();
 
-            }
-
-            public void onFailure(ParticleCloudException e) {
-                relay.tryToSwitch = false;
-                Log.e("SOME_TAG", e.getBestMessage());
-                Toaster.l(RelayScrollingActivity.this, e.getBestMessage());
-                recyclerView.getAdapter().notifyDataSetChanged();
-            }
+                }
 
 
-        });
+            });
+
+        }
+        else {
+            Toaster.l(RelayScrollingActivity.this, "Wait till all relays finished switching");
+        }
 
 
     }
