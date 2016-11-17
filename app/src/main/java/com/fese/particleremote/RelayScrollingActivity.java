@@ -105,7 +105,7 @@ public class RelayScrollingActivity extends AppCompatActivity {
         RVadapterRelay.RelayViewHolder.setOnItemLongClickListener(new RVadapterRelay.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClicked(String pin) {
-                //TODO: show relay properties (edit name, edit pin (dropdown menu), checkbox for confirmation?)
+                //TODO: show relay properties (edit name, edit pin (dropdown menu), checkbox for confirmation?) te
                 return false;
             }
         });
