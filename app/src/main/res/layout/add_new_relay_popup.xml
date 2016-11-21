@@ -27,7 +27,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
-        android:id="@+id/linLayout"
+        android:id="@+id/linLayoutSelectPin"
         android:orientation="horizontal">
         <TextView
             android:layout_width="wrap_content"
@@ -45,15 +45,56 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_below="@+id/linLayoutSelectPin"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:id="@+id/linLayoutSetTimer"
+        android:orientation="horizontal">
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:layout_gravity="center_vertical"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Toggle back after:"
+            android:id="@+id/relayTimerCheckBox" />
+
+
+        <EditText
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/inputTimerNumber"
+            android:inputType="number"
+            android:hint="0"
+            android:maxLength="3"
+            android:enabled="false"
+            android:imeOptions="actionNext"/>
+
+
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:id="@+id/relayTimerUnitSpinner"
+            />
+
+
+
+    </LinearLayout>
 
     <CheckBox
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:textSize="16sp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         android:text="Confirmation before toggling relay"
         android:id="@+id/ConfirmationCheckBox"
-        android:layout_below="@+id/linLayout"
+        android:layout_below="@+id/linLayoutSetTimer"
         android:checked="false" />
 
 

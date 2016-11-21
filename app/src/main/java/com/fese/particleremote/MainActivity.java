@@ -126,6 +126,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //TODO: show hint if device is offline
+    //TODO: lookup in Tinker Code on GitHub, how to give the ParticleDevice object to a new activity
     private void startParticleFunctionDialog(final String deviceID){
         new MaterialDialog.Builder(MainActivity.this)
                 .title(R.string.title_function_dialog_list)

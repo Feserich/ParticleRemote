@@ -20,15 +20,17 @@ class Relay {
     boolean isSwitched;
     boolean tryToSwitch;
     boolean switchConfirmation;
+    Integer toggleTime;
 
     //TODO: boolean confirmation Popup
 
-    Relay(String relayName, String pin, boolean isSwitched, boolean switchConfirmation, boolean tryToSwitch) {
+    Relay(String relayName, String pin, boolean isSwitched, boolean switchConfirmation, boolean tryToSwitch, Integer toggleTime) {
         this.relayName = relayName;
         this.pin = pin;
         this.tryToSwitch = tryToSwitch;
         this.isSwitched = isSwitched;
         this.switchConfirmation = switchConfirmation;
+        this.toggleTime = toggleTime;
     }
 }
 
