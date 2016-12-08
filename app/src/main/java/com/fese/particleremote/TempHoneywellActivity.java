@@ -5,10 +5,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.TextSwitcher;
+import android.widget.TextView;
+import android.widget.ViewSwitcher;
+import net.steamcrafted.loadtoast.LoadToast;
+
+
+import org.adw.library.widgets.discreteseekbar.DiscreteSeekBar;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,13 +30,18 @@ public class TempHoneywellActivity extends AppCompatActivity {
     private String myParticleID;
     private ParticleDevice myParticleDevice;
     private Button btn_setTemp;
-    private EditText et_targetTemp;
+    private TextSwitcher ts_targetTemp;
+    private int targetTemp = 0;
+    public static final int LOWEST_TARGET_TEMP_VALUE = 13;
+    private LoadToast setTempToast;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_temp_honeywell);
+
+        targetTemp = LOWEST_TARGET_TEMP_VALUE;
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.app_bar);
         setSupportActionBar(toolbar);
@@ -40,9 +52,49 @@ public class TempHoneywellActivity extends AppCompatActivity {
 
 
         btn_setTemp = (Button)findViewById(R.id.btn_setTargetTemp);
-        et_targetTemp = (EditText)findViewById(R.id.et_targetTemperature);
+        ts_targetTemp = (TextSwitcher)findViewById(R.id.ts_targetTemp);
+
+        setTempToast = new LoadToast(this);
+        setTempToast.setText("Setting temperature...");
+        //setTempToast.setTranslationY(200);                //translation in pixels
 
         btn_setTemp.setOnClickListener(setTempOnClick);
+
+        ts_targetTemp.setFactory(new ViewSwitcher.ViewFactory() {
+
+            public View makeView() {
+                // TODO Auto-generated method stub
+                // create new textView and set the properties like clolr, size etc
+                TextView myText = new TextView(TempHoneywellActivity.this);
+                myText.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
+                myText.setTextSize(92);
+                myText.setText(String.valueOf(targetTemp));
+                //myText.setTextColor(Color.BLUE);
+                return myText;
+            }
+        });
+
+
+        DiscreteSeekBar discreteSeekBarTargetTemp = (DiscreteSeekBar) findViewById(R.id.discrete_seekbar_target_temp);
+        discreteSeekBarTargetTemp.setNumericTransformer(new DiscreteSeekBar.NumericTransformer() {
+            @Override
+            public int transform(int value) {
+                targetTemp = value;
+                switch (targetTemp){
+                    case 13: ts_targetTemp.setText("OFF");
+                        break;
+
+                    case 27: ts_targetTemp.setText("ON");
+                        break;
+
+                    default: ts_targetTemp.setText(String.valueOf(targetTemp) + " °C");
+                        break;
+
+                }
+                
+                return value;
+            }
+        });
 
 
 
@@ -60,40 +112,47 @@ public class TempHoneywellActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-    //TODO: send Off Command (targetTempRaw = 75)
+
 
     View.OnClickListener setTempOnClick = new View.OnClickListener(){
         @Override
         public void onClick(View v) {
-            float targetTemp = Float.valueOf(et_targetTemp.getText().toString());
-            int targetTempRaw = Math.round(targetTemp * 10);
-            setTemperature(Float.toString(targetTempRaw));
+            //float targetTemp_f = Float.valueOf();
+            //int targetTempRaw = Math.round(targetTemp_f * 10);
+            if (targetTemp == LOWEST_TARGET_TEMP_VALUE) {
+                setTemperature("75");                                   //value to set Honeywell to OFF
+            }
+            else {
+                setTemperature(String.valueOf(targetTemp * 10));
+            }
+
 
         }
 
         };
 
-    private void setTemperature(final String targetTemp){
+    private void setTemperature(final String targetTempRAW){
         if (myParticleDevice != null){
 
-
+            setTempToast.show();
             Async.executeAsync(myParticleDevice, new Async.ApiWork<io.particle.android.sdk.cloud.ParticleDevice, Integer>() {
 
                 @Override
                 public Integer callApi(io.particle.android.sdk.cloud.ParticleDevice particleDevice) throws ParticleCloudException, IOException {
                     Integer success = 0;
 
-
                     //the commands in functionCommandList will be executed by the Particle device
                     ArrayList functionCommandList = new ArrayList<String>();
-                    functionCommandList.add(targetTemp);
+                    functionCommandList.add(targetTempRAW);
 
 
                     try {
+
                         success = particleDevice.callFunction("setTempHoney",functionCommandList);
 
                     } catch (io.particle.android.sdk.cloud.ParticleDevice.FunctionDoesNotExistException e) {
-                        Toaster.l(TempHoneywellActivity.this, "Function doesn't exist!");
+                        Toaster.l(TempHoneywellActivity.this, e.toString());
+                        setTempToast.error();
                     }
 
                     return success;
@@ -102,14 +161,19 @@ public class TempHoneywellActivity extends AppCompatActivity {
 
                 public void onSuccess(Integer returnValue) {
                     if (returnValue == 1) {
-
-
+                        setTempToast.success();
                     }
                     else if (returnValue == -1){
-
+                        setTempToast.error();
+                        Toaster.l(TempHoneywellActivity.this, "Wrong response!");
                     }
                     else if (returnValue == -2){
-
+                        Toaster.l(TempHoneywellActivity.this, "Read Buffer Overflow!");
+                        setTempToast.error();
+                    }
+                    else if (returnValue == -3){
+                        Toaster.l(TempHoneywellActivity.this, "TimeOut!");
+                        setTempToast.error();
                     }
 
                     //recyclerView.getAdapter().notifyDataSetChanged();
@@ -117,6 +181,7 @@ public class TempHoneywellActivity extends AppCompatActivity {
 
                 public void onFailure(ParticleCloudException e) {
                     Log.e("SOME_TAG", e.getBestMessage());
+                    setTempToast.error();
                     Toaster.l(TempHoneywellActivity.this, e.getBestMessage());
 
                 }

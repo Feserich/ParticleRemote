@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/activity_temp_honeywell"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -9,29 +10,38 @@
     <include
         layout="@layout/app_bar" />
 
-    <android.support.design.widget.TextInputLayout
+
+    <TextSwitcher
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/ts_targetTemp"
+        android:layout_below="@+id/app_bar"
+        android:layout_centerHorizontal="true"
+
+        >
+
+
+    </TextSwitcher>
+
+    <org.adw.library.widgets.discreteseekbar.DiscreteSeekBar
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/app_bar"
-        android:layout_alignParentStart="true"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:id="@+id/input_target_temperature_layout"
-        android:layout_marginBottom="8dp">
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/et_targetTemperature"
-            android:inputType="numberDecimal"
-            android:hint="Target temperature"
-            android:imeOptions="actionNext"/>
-    </android.support.design.widget.TextInputLayout>
+        android:layout_marginEnd="16dp"
+        android:layout_centerVertical="true"
+        android:id="@+id/discrete_seekbar_target_temp"
+        app:dsb_min="13"
+        app:dsb_max="27"
+        app:dsb_indicatorFormatter="%d °C"
+        />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:layout_centerHorizontal="true"
-        android:layout_below="@id/input_target_temperature_layout"
+        android:layout_below="@id/discrete_seekbar_target_temp"
         android:id="@+id/btn_setTargetTemp"
         android:text="Set Temperature"
         />
