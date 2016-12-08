@@ -8,11 +8,13 @@ import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.NavUtils;
+import android.support.v4.text.TextUtilsCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -77,6 +79,7 @@ public class RelayScrollingActivity extends AppCompatActivity {
 
     private void toggleRelay(final Relay relay){
 
+        if (myParticleDevice != null){
             relay.tryToSwitch = true;
             recyclerView.getAdapter().notifyDataSetChanged();
 
@@ -140,6 +143,12 @@ public class RelayScrollingActivity extends AppCompatActivity {
 
 
             });
+        }
+        else {
+            Toaster.l(RelayScrollingActivity.this, "Wait a sec!");
+        }
+
+
     }
 
     private void getParticleDeviceInstance(){
@@ -257,7 +266,7 @@ public class RelayScrollingActivity extends AppCompatActivity {
                         editRelayName = relayName.getText().toString();
                         editSwitchConfirmation = confirmation.isChecked();
 
-                        if (checkBoxTimeUnit.isChecked())
+                        if (checkBoxTimeUnit.isChecked() && !et_toggleTime.getText().toString().isEmpty())
                         {
 
                             toggleTime = Integer.parseInt(et_toggleTime.getText().toString());
@@ -327,7 +336,7 @@ public class RelayScrollingActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
 
         collapsingToolbar = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
         collapsingToolbar.setTitle("Toggle Relay");
@@ -348,6 +357,7 @@ public class RelayScrollingActivity extends AppCompatActivity {
                 showAddNewRelayPopup();
             }
         });
+
 
         RVadapterRelay.RelayViewHolder.setOnItemClickListener(new RVadapterRelay.OnItemClickListener() {
             @Override

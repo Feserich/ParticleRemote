@@ -9,12 +9,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toolbar;
+
 
 import com.afollestad.materialdialogs.MaterialDialog;
 
@@ -31,7 +32,7 @@ import io.particle.android.sdk.utils.Toaster;
 public class MainActivity extends AppCompatActivity {
 
 
-    private Toolbar toolbar;
+
     private String emailKey = "email";
     private String passwordKey = "password";
     private RecyclerView rv;
@@ -57,8 +58,8 @@ public class MainActivity extends AppCompatActivity {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         rv.setLayoutManager(linearLayoutManager);
 
-        toolbar = (Toolbar) findViewById(R.id.app_bar);
-        setActionBar(toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
+        setSupportActionBar(toolbar);
 
         RVdevices = new ArrayList<>();
         RVAdapter adapter = new RVAdapter(RVdevices);
@@ -122,11 +123,10 @@ public class MainActivity extends AppCompatActivity {
         ParticleFunctions[0] = "Toggle LED";
         ParticleFunctions[1] = "Switch Relays";
         ParticleFunctions[2] = "Read temperature & humidity";
-        ParticleFunctions[3] = "Send IR-Signals";
+        ParticleFunctions[3] = "Set Honeywell temperature";
     }
 
     //TODO: show hint if device is offline
-    //TODO: lookup in Tinker Code on GitHub, how to give the ParticleDevice object to a new activity
     private void startParticleFunctionDialog(final String deviceID){
         new MaterialDialog.Builder(MainActivity.this)
                 .title(R.string.title_function_dialog_list)
@@ -151,7 +151,9 @@ public class MainActivity extends AppCompatActivity {
                                 MainActivity.this.startActivity(intentTempHumi);
                                 break;
                             case 3:
-                                Toaster.l(MainActivity.this, "Coming soon...");
+                                Intent intentTempHoneywell = new Intent(MainActivity.this, TempHoneywellActivity.class);
+                                intentTempHoneywell.putExtra("deviceID", deviceID);
+                                MainActivity.this.startActivity(intentTempHoneywell);
                                 break;
                             case 4:
                                 Toaster.l(MainActivity.this, "Coming soon...");

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_temp_honeywell"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.fese.particleremote.TempHoneywellActivity">
+
+    <include
+        layout="@layout/app_bar" />
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/app_bar"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:id="@+id/input_target_temperature_layout"
+        android:layout_marginBottom="8dp">
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/et_targetTemperature"
+            android:inputType="numberDecimal"
+            android:hint="Target temperature"
+            android:imeOptions="actionNext"/>
+    </android.support.design.widget.TextInputLayout>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/input_target_temperature_layout"
+        android:id="@+id/btn_setTargetTemp"
+        android:text="Set Temperature"
+        />
+
+    <ProgressBar
+        android:id="@+id/progressBar1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginLeft="23dp"
+        android:layout_marginTop="20dp"
+        android:indeterminate="false"
+        android:layout_below="@+id/btn_setTargetTemp"
+        android:max="100"
+        android:progress="1"
+        android:visibility="gone"/>
+
+
+
+
+
+</RelativeLayout>

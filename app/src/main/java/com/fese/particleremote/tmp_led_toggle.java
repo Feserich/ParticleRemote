@@ -43,11 +43,11 @@ public class tmp_led_toggle extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tmp_led_toggle);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.app_bar);
-        setActionBar(toolbar);
+        android.support.v7.widget.Toolbar toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.app_bar);
+        setSupportActionBar(toolbar);
 
-        getActionBar().setHomeButtonEnabled(true);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
 
         myPhotonID = (String) getIntent().getSerializableExtra("deviceID");

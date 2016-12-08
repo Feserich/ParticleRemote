@@ -22,26 +22,28 @@
         </activity>
         <activity
             android:name=".tmp_led_toggle"
-            android:parentActivityName=".MainActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+            android:theme="@style/AppTheme"
+            android:parentActivityName="com.fese.particleremote.MainActivity">
         </activity>
         <activity android:name=".LoginActivity" />
         <activity
             android:name=".TempHumiActivity"
-            android:parentActivityName=".MainActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+            android:theme="@style/AppTheme"
+            android:parentActivityName="com.fese.particleremote.MainActivity">
+
         </activity>
         <activity
             android:name=".RelayScrollingActivity"
             android:label="@string/title_activity_relay_scrolling"
-            android:theme="@style/AppTheme">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+            android:theme="@style/AppTheme"
+            android:parentActivityName="com.fese.particleremote.MainActivity">
+
+        </activity>
+        <activity
+            android:name=".TempHoneywellActivity"
+            android:theme="@style/AppTheme"
+            android:parentActivityName="com.fese.particleremote.MainActivity">
+
         </activity>
     </application>
 

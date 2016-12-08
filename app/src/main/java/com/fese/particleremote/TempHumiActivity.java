@@ -39,10 +39,12 @@ public class TempHumiActivity extends AppCompatActivity {
         //TODO: Detect if activity has been stopped or paused then set loopMeasurement = false
         loopMeasurement = true;
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.app_bar);
-        setActionBar(toolbar);
-        getActionBar().setHomeButtonEnabled(true);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        //TODO: navigate up to the parent activity don't work (arrow top left)
+        android.support.v7.widget.Toolbar toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.app_bar);
+        setSupportActionBar(toolbar);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
         getTemperatureAndHumidity();
     }
