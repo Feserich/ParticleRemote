@@ -18,6 +18,8 @@ import android.view.View;
 
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private List<ParticleDevice> RVdevices;
     private List<io.particle.android.sdk.cloud.ParticleDevice> availableDevices;
     private io.particle.android.sdk.cloud.ParticleDevice selectedDevice;
+    private SharedPreferences deviceListSharedPref;
 
 
 
@@ -61,7 +64,10 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar);
 
+        deviceListSharedPref = getPreferences(MODE_PRIVATE);
+
         RVdevices = new ArrayList<>();
+        loadDeviceList();
         RVAdapter adapter = new RVAdapter(RVdevices);
         rv.setAdapter(adapter);
 
@@ -90,24 +96,19 @@ public class MainActivity extends AppCompatActivity {
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                loadParticleDeviceList();
+                getParticleDeviceListFromCloud();
             }
         });
 
 
         //call Method on Create
         checkForSavedCredentials();
+
         initializeParticleFunctions();
 
 
     }
 
-    private void initializeAdapter() {
-        //TODO: notify the adapter instead of create a new adapter object each time new dataset is available
-        RVAdapter adapter = new RVAdapter(RVdevices);
-        rv.setAdapter(adapter);
-        mSwipeRefreshLayout.setRefreshing(false);
-    }
 
     private void initializeTestDeviceList() {
         RVdevices.add(new ParticleDevice("hamster_power", "test device", "ELECTRON", true));
@@ -177,12 +178,39 @@ public class MainActivity extends AppCompatActivity {
         //Check if saved credentials are available
         if ((email != null) && (password != null)) {
             AutoLogin(email, password);
+            mSwipeRefreshLayout.setRefreshing(true);
         } else {
             startLoginActivity();
         }
     }
 
-public void AutoLogin(final String email, final String password) {
+    private void storeDeviceList(){
+        SharedPreferences.Editor prefsEditor = deviceListSharedPref.edit();
+        //transform the relay list to a string
+        Gson gson = new Gson();
+        String json = gson.toJson(RVdevices);
+        //store this Json string in Shared Preferences
+        prefsEditor.putString("Saved Particle Devices:", json);
+        prefsEditor.commit();
+
+    }
+
+    private void loadDeviceList(){
+        Gson gson = new Gson();
+        //load the Json String. If no string is available the relay list is null
+        String json = deviceListSharedPref.getString("Saved Particle Devices:", "");
+        //transform the Json string into the original relay list
+        RVdevices = gson.fromJson(json, new TypeToken<List<ParticleDevice>>() {}.getType());
+
+        if (RVdevices == null){
+            //create a new empty ArrayList
+            RVdevices = new ArrayList<>();
+        }
+        //TODO: set all devices to Offline Status
+
+    }
+
+    public void AutoLogin(final String email, final String password) {
         Async.executeAsync(ParticleCloudSDK.getCloud(), new Async.ApiWork<ParticleCloud, Void>() {
 
             public Void callApi(ParticleCloud particleCloud) throws ParticleCloudException, IOException {
@@ -193,12 +221,13 @@ public void AutoLogin(final String email, final String password) {
             public void onSuccess(Void aVoid) {
                 Toaster.l(MainActivity.this, "Logged in");
 
-                loadParticleDeviceList();
+                getParticleDeviceListFromCloud();
             }
 
             public void onFailure(ParticleCloudException e) {
                 Log.e("SOME_TAG", e.getBestMessage());
                 Toaster.l(MainActivity.this, "Wrong credentials or no internet connectivity, please try again");
+                mSwipeRefreshLayout.setRefreshing(false);
                 startLoginActivity();
             }
 
@@ -213,6 +242,11 @@ public void AutoLogin(final String email, final String password) {
         editor.remove(emailKey);
         editor.remove(passwordKey);
         editor.apply();
+
+        //delete device List
+        SharedPreferences.Editor prefsEditor = deviceListSharedPref.edit();
+        prefsEditor.remove("Saved Particle Devices:");
+        prefsEditor.apply();
 
 
         Async.executeAsync(ParticleCloudSDK.getCloud(), new Async.ApiWork<ParticleCloud, Void>() {
@@ -237,7 +271,7 @@ public void AutoLogin(final String email, final String password) {
 
     }
 
-    public void loadParticleDeviceList() {
+    public void getParticleDeviceListFromCloud() {
         Async.executeAsync(ParticleCloudSDK.getCloud(), new Async.ApiWork<ParticleCloud, List<io.particle.android.sdk.cloud.ParticleDevice>>() {
             public List<io.particle.android.sdk.cloud.ParticleDevice> callApi(ParticleCloud particleCloud) throws ParticleCloudException, IOException {
                 return particleCloud.getDevices();
@@ -250,8 +284,9 @@ public void AutoLogin(final String email, final String password) {
                     RVdevices.add(new ParticleDevice(device.getName(), device.getID(), device.getDeviceType().toString(), device.isConnected()));
                 }
                 initializeTestDeviceList();
-                initializeAdapter();
-
+                rv.getAdapter().notifyDataSetChanged();
+                mSwipeRefreshLayout.setRefreshing(false);
+                storeDeviceList();
             }
 
             public void onFailure(ParticleCloudException e) {

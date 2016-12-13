@@ -151,8 +151,7 @@ public class TempHoneywellActivity extends AppCompatActivity {
                         success = particleDevice.callFunction("setTempHoney",functionCommandList);
 
                     } catch (io.particle.android.sdk.cloud.ParticleDevice.FunctionDoesNotExistException e) {
-                        Toaster.l(TempHoneywellActivity.this, e.toString());
-                        setTempToast.error();
+                        Toaster.l(TempHoneywellActivity.this, e.getMessage().toString());
                     }
 
                     return success;
@@ -188,6 +187,8 @@ public class TempHoneywellActivity extends AppCompatActivity {
 
 
             });
+
+
         }
         else {
             Toaster.l(TempHoneywellActivity.this, "Wait a sec!");
