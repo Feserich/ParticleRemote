@@ -43,7 +43,6 @@ public class MainActivity extends AppCompatActivity {
 
     private List<ParticleDevice> RVdevices;
     private List<io.particle.android.sdk.cloud.ParticleDevice> availableDevices;
-    private io.particle.android.sdk.cloud.ParticleDevice selectedDevice;
     private SharedPreferences deviceListSharedPref;
 
 
@@ -77,10 +76,10 @@ public class MainActivity extends AppCompatActivity {
         RVAdapter.DeviceViewHolder.setOnParticleDeviceClickedListener(new RVAdapter.OnParticleDeviceClickedListener() {
             @Override
             public void onParticleDeviceClicked(String deviceID) {
+                //TODO: RVdevices instead of availableDevices????
                 if (availableDevices != null) {
                     for (io.particle.android.sdk.cloud.ParticleDevice CloudDevice : availableDevices) {
                         if (CloudDevice.getID().equals(deviceID)) {
-                            selectedDevice = CloudDevice;
                             startParticleFunctionDialog(deviceID);
                         } else if (deviceID.equals("test device")) {
                             Toaster.l(MainActivity.this, "Selected device is a virtual test device!");
