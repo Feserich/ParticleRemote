@@ -40,7 +40,6 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView rv;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private String[] ParticleFunctions = new String[4];
-
     private List<ParticleDevice> RVdevices;
     private List<io.particle.android.sdk.cloud.ParticleDevice> availableDevices;
     private SharedPreferences deviceListSharedPref;
@@ -51,8 +50,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        //TODO: Improve loading time: Save device List in sharedPref. (set Status always to offline)
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.activity_main_swipe_refresh_layout);
         mSwipeRefreshLayout.setColorSchemeResources(R.color.colorAccent, R.color.blue, R.color.green);
@@ -66,7 +63,8 @@ public class MainActivity extends AppCompatActivity {
         deviceListSharedPref = getPreferences(MODE_PRIVATE);
 
         RVdevices = new ArrayList<>();
-        loadDeviceList();
+        loadDeviceList();                       //must be called before adapter gets initialized
+
         RVAdapter adapter = new RVAdapter(RVdevices);
         rv.setAdapter(adapter);
 
@@ -76,15 +74,14 @@ public class MainActivity extends AppCompatActivity {
         RVAdapter.DeviceViewHolder.setOnParticleDeviceClickedListener(new RVAdapter.OnParticleDeviceClickedListener() {
             @Override
             public void onParticleDeviceClicked(String deviceID) {
-                //TODO: RVdevices instead of availableDevices????
-                if (availableDevices != null) {
-                    for (io.particle.android.sdk.cloud.ParticleDevice CloudDevice : availableDevices) {
-                        if (CloudDevice.getID().equals(deviceID)) {
-                            startParticleFunctionDialog(deviceID);
-                        } else if (deviceID.equals("test device")) {
+                if (RVdevices != null) {
+                    //TODO: delete this steps when all TestDevices has been deleted
+                    for (ParticleDevice device : RVdevices) {
+                        if (deviceID.equals("test device")) {
                             Toaster.l(MainActivity.this, "Selected device is a virtual test device!");
-                        } else {
-                            Toaster.l(MainActivity.this, "Error");
+                        }
+                        else if (device.deviceID.equals(deviceID)) {
+                            startParticleFunctionDialog(deviceID);
                         }
 
                     }
@@ -100,10 +97,23 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+
+        /*
+        //show SwipeRefreshLayout onCreate till getParticleDeviceListFromCloud has been completed
+        mSwipeRefreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                mSwipeRefreshLayout.setRefreshing(true);
+            }
+        });
+        */
+
+
+
         //call Method on Create
         checkForSavedCredentials();
-
         initializeParticleFunctions();
+
 
 
     }
@@ -118,8 +128,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initializeParticleFunctions(){
-        //TODO: Load available Functions from Particle Cloud
-        //TODO: Save Strings in strings.xml
         ParticleFunctions[0] = "Toggle LED";
         ParticleFunctions[1] = "Switch Relays";
         ParticleFunctions[2] = "Read temperature & humidity";
@@ -172,14 +180,15 @@ public class MainActivity extends AppCompatActivity {
         //load stored email and password
         String email = mPrefs.getString(emailKey, null);
         String password = mPrefs.getString(passwordKey, null);
-        //TODO: Decrypt Password
+        //TODO: Use OAuth or Decrypt Password
 
         //Check if saved credentials are available
         if ((email != null) && (password != null)) {
             AutoLogin(email, password);
-            mSwipeRefreshLayout.setRefreshing(true);
         } else {
+            mSwipeRefreshLayout.setRefreshing(false);
             startLoginActivity();
+
         }
     }
 
@@ -196,16 +205,18 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadDeviceList(){
         Gson gson = new Gson();
-        //load the Json String. If no string is available the relay list is null
+        //load the Json String. If no string is available the device list is null
         String json = deviceListSharedPref.getString("Saved Particle Devices:", "");
-        //transform the Json string into the original relay list
+        //transform the Json string into the original device list
         RVdevices = gson.fromJson(json, new TypeToken<List<ParticleDevice>>() {}.getType());
 
+        //if no String is available RVdevices is set to null!
         if (RVdevices == null){
             //create a new empty ArrayList
             RVdevices = new ArrayList<>();
         }
-        //TODO: set all devices to Offline Status
+
+        //rv.getAdapter().notifyDataSetChanged();
 
     }
 
@@ -218,8 +229,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             public void onSuccess(Void aVoid) {
-                Toaster.l(MainActivity.this, "Logged in");
-
+                //Toaster.l(MainActivity.this, "Logged in");
                 getParticleDeviceListFromCloud();
             }
 
