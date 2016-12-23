@@ -145,13 +145,12 @@ public class TempHoneywellActivity extends AppCompatActivity {
                     ArrayList functionCommandList = new ArrayList<String>();
                     functionCommandList.add(targetTempRAW);
 
-
                     try {
-
                         success = particleDevice.callFunction("setTempHoney",functionCommandList);
 
                     } catch (io.particle.android.sdk.cloud.ParticleDevice.FunctionDoesNotExistException e) {
-                        Toaster.l(TempHoneywellActivity.this, e.getMessage().toString());
+                        Toaster.l(TempHoneywellActivity.this, e.toString());
+                        setTempToast.error();
                     }
 
                     return success;
@@ -159,20 +158,22 @@ public class TempHoneywellActivity extends AppCompatActivity {
 
 
                 public void onSuccess(Integer returnValue) {
-                    if (returnValue == 1) {
-                        setTempToast.success();
-                    }
-                    else if (returnValue == -1){
-                        setTempToast.error();
-                        Toaster.l(TempHoneywellActivity.this, "Wrong response!");
-                    }
-                    else if (returnValue == -2){
-                        Toaster.l(TempHoneywellActivity.this, "Read Buffer Overflow!");
-                        setTempToast.error();
-                    }
-                    else if (returnValue == -3){
-                        Toaster.l(TempHoneywellActivity.this, "TimeOut!");
-                        setTempToast.error();
+                    switch (returnValue){
+                        case 1:
+                            setTempToast.success();
+                            break;
+                        case -1:
+                            setTempToast.error();
+                            Toaster.l(TempHoneywellActivity.this, "Wrong response!");
+                            break;
+                        case -2:
+                            Toaster.l(TempHoneywellActivity.this, "Read Buffer Overflow!");
+                            setTempToast.error();
+                            break;
+                        case -3:
+                            Toaster.l(TempHoneywellActivity.this, "TimeOut!");
+                            setTempToast.error();
+                            break;
                     }
 
                     //recyclerView.getAdapter().notifyDataSetChanged();
@@ -182,13 +183,9 @@ public class TempHoneywellActivity extends AppCompatActivity {
                     Log.e("SOME_TAG", e.getBestMessage());
                     setTempToast.error();
                     Toaster.l(TempHoneywellActivity.this, e.getBestMessage());
-
                 }
 
-
             });
-
-
         }
         else {
             Toaster.l(TempHoneywellActivity.this, "Wait a sec!");
@@ -220,6 +217,5 @@ public class TempHoneywellActivity extends AppCompatActivity {
         });
 
     }
-
 
 }

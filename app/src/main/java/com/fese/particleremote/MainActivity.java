@@ -128,10 +128,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initializeParticleFunctions(){
-        ParticleFunctions[0] = "Toggle LED";
-        ParticleFunctions[1] = "Switch Relays";
-        ParticleFunctions[2] = "Read temperature & humidity";
-        ParticleFunctions[3] = "Set Honeywell temperature";
+        //ParticleFunctions[0] = "Toggle LED";
+        ParticleFunctions[0] = "Switch Relays";
+        ParticleFunctions[1] = "Read temperature & humidity";
+        ParticleFunctions[2] = "Set Honeywell temperature";
     }
 
     //TODO: show hint if device is offline
@@ -144,35 +144,27 @@ public class MainActivity extends AppCompatActivity {
                     public void onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
                         switch (which) {
                             case 0:
-                                Intent intentToggleLED = new Intent(MainActivity.this, tmp_led_toggle.class);
-                                intentToggleLED.putExtra("deviceID", deviceID);
-                                MainActivity.this.startActivity(intentToggleLED);
-                                break;
-                            case 1:
                                 Intent intentRelay = new Intent(MainActivity.this, RelayScrollingActivity.class);
                                 intentRelay.putExtra("deviceID", deviceID);
                                 MainActivity.this.startActivity(intentRelay);
                                 break;
-                            case 2:
+                            case 1:
                                 Intent intentTempHumi = new Intent(MainActivity.this, TempHumiActivity.class);
                                 intentTempHumi.putExtra("deviceID", deviceID);
                                 MainActivity.this.startActivity(intentTempHumi);
                                 break;
-                            case 3:
+                            case 2:
                                 Intent intentTempHoneywell = new Intent(MainActivity.this, TempHoneywellActivity.class);
                                 intentTempHoneywell.putExtra("deviceID", deviceID);
                                 MainActivity.this.startActivity(intentTempHoneywell);
                                 break;
-                            case 4:
-                                Toaster.l(MainActivity.this, "Coming soon...");
-                                break;
+
                         }
                     }
                 })
                 .show();
 
-        //Intent intentToggleLED = new Intent(MainActivity.this, tmp_led_toggle.class);
-        //MainActivity.this.startActivity(intentToggleLED);
+
     }
 
     private void checkForSavedCredentials() {
@@ -304,7 +296,6 @@ public class MainActivity extends AppCompatActivity {
                 mSwipeRefreshLayout.setRefreshing(false);
             }
         });
-
 
 
     }

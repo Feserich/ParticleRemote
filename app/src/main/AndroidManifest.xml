@@ -20,11 +20,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".tmp_led_toggle"
-            android:theme="@style/AppTheme"
-            android:parentActivityName="com.fese.particleremote.MainActivity">
-        </activity>
         <activity android:name=".LoginActivity" />
         <activity
             android:name=".TempHumiActivity"
