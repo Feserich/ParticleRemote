@@ -22,7 +22,6 @@ class Relay {
     boolean switchConfirmation;
     Integer toggleTime;
 
-    //TODO: boolean confirmation Popup
 
     Relay(String relayName, String pin, boolean isSwitched, boolean switchConfirmation, boolean tryToSwitch, Integer toggleTime) {
         this.relayName = relayName;

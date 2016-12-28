@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import android.content.SharedPreferences;
+import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -23,6 +24,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import io.particle.android.sdk.cloud.ParticleCloud;
@@ -68,19 +70,20 @@ public class MainActivity extends AppCompatActivity {
         RVAdapter adapter = new RVAdapter(RVdevices);
         rv.setAdapter(adapter);
 
-        ParticleCloudSDK.init(this);
+
+
 
 
         RVAdapter.DeviceViewHolder.setOnParticleDeviceClickedListener(new RVAdapter.OnParticleDeviceClickedListener() {
             @Override
             public void onParticleDeviceClicked(String deviceID) {
                 if (RVdevices != null) {
-                    //TODO: delete this steps when all TestDevices has been deleted
                     for (ParticleDevice device : RVdevices) {
                         if (deviceID.equals("test device")) {
                             Toaster.l(MainActivity.this, "Selected device is a virtual test device!");
                         }
                         else if (device.deviceID.equals(deviceID)) {
+                            //TODO: show hint if device is offline
                             startParticleFunctionDialog(deviceID);
                         }
 
@@ -98,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        /*
+
         //show SwipeRefreshLayout onCreate till getParticleDeviceListFromCloud has been completed
         mSwipeRefreshLayout.post(new Runnable() {
             @Override
@@ -106,13 +109,14 @@ public class MainActivity extends AppCompatActivity {
                 mSwipeRefreshLayout.setRefreshing(true);
             }
         });
-        */
+
 
 
 
         //call Method on Create
-        checkForSavedCredentials();
-        initializeParticleFunctions();
+        ParticleCloudSDK.init(this);
+        checkLoginStatus();
+        initializeParticleDeviceFunctions();
 
 
 
@@ -120,22 +124,23 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void initializeTestDeviceList() {
-        RVdevices.add(new ParticleDevice("hamster_power", "test device", "ELECTRON", true));
-        RVdevices.add(new ParticleDevice("bobcat_mutant", "test device", "ELECTRON", false));
-        RVdevices.add(new ParticleDevice("normal_pizza", "test device", "CORE", true));
-        RVdevices.add(new ParticleDevice("turtle_turkey", "test device", "PHOTON", true));
+        RVdevices.add(new ParticleDevice("*Electron Test Device", "test device", "ELECTRON", false));
+        RVdevices.add(new ParticleDevice("*Core Test Device", "test device", "CORE", true));
+
 
     }
 
-    private void initializeParticleFunctions(){
-        //ParticleFunctions[0] = "Toggle LED";
+    private void initializeParticleDeviceFunctions(){
+
         ParticleFunctions[0] = "Switch Relays";
         ParticleFunctions[1] = "Read temperature & humidity";
         ParticleFunctions[2] = "Set Honeywell temperature";
+        ParticleFunctions[3] = "Send commands over 433Mhz radio";
     }
 
-    //TODO: show hint if device is offline
+
     private void startParticleFunctionDialog(final String deviceID){
+
         new MaterialDialog.Builder(MainActivity.this)
                 .title(R.string.title_function_dialog_list)
                 .items(ParticleFunctions)
@@ -158,6 +163,9 @@ public class MainActivity extends AppCompatActivity {
                                 intentTempHoneywell.putExtra("deviceID", deviceID);
                                 MainActivity.this.startActivity(intentTempHoneywell);
                                 break;
+                            case 3:
+                                Toaster.l(MainActivity.this, "Coming soon...");
+                                break;
 
                         }
                     }
@@ -167,21 +175,12 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void checkForSavedCredentials() {
-        SharedPreferences mPrefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
-        //load stored email and password
-        String email = mPrefs.getString(emailKey, null);
-        String password = mPrefs.getString(passwordKey, null);
-        //TODO: Use OAuth or Decrypt Password
-
-        //Check if saved credentials are available
-        if ((email != null) && (password != null)) {
-            AutoLogin(email, password);
-        } else {
-            mSwipeRefreshLayout.setRefreshing(false);
-            startLoginActivity();
-
+    private void checkLoginStatus() {
+        if (ParticleCloudSDK.getCloud().isLoggedIn()){
+            getParticleDeviceListFromCloud();
         }
+        else startLoginActivity();
+
     }
 
     private void storeDeviceList(){
@@ -212,70 +211,36 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void AutoLogin(final String email, final String password) {
-        Async.executeAsync(ParticleCloudSDK.getCloud(), new Async.ApiWork<ParticleCloud, Void>() {
-
-            public Void callApi(ParticleCloud particleCloud) throws ParticleCloudException, IOException {
-                particleCloud.logIn(email, password);
-                return null;
-            }
-
-            public void onSuccess(Void aVoid) {
-                //Toaster.l(MainActivity.this, "Logged in");
-                getParticleDeviceListFromCloud();
-            }
-
-            public void onFailure(ParticleCloudException e) {
-                Log.e("SOME_TAG", e.getBestMessage());
-                Toaster.l(MainActivity.this, "Wrong credentials or no internet connectivity, please try again");
-                mSwipeRefreshLayout.setRefreshing(false);
-                startLoginActivity();
-            }
-
-        });
-    }
-
     public void logout() {
 
+        /*
         //delete credentials in SharedPreferences
         SharedPreferences mPrefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = mPrefs.edit();
         editor.remove(emailKey);
         editor.remove(passwordKey);
         editor.apply();
+        */
 
         //delete device List
         SharedPreferences.Editor prefsEditor = deviceListSharedPref.edit();
         prefsEditor.remove("Saved Particle Devices:");
         prefsEditor.apply();
 
+        //Logout the user. Clear session and access token
+        ParticleCloudSDK.getCloud().logOut();
 
-        Async.executeAsync(ParticleCloudSDK.getCloud(), new Async.ApiWork<ParticleCloud, Void>() {
-            public Void callApi(ParticleCloud particleCloud) throws ParticleCloudException, IOException {
-                particleCloud.logOut();
-                return null;
-            }
+        startLoginActivity();
 
-            public void onSuccess(Void aVoid) {
-                Toaster.l(MainActivity.this, "Logged out");
-
-                // show LoginActivity...
-                startLoginActivity();
-            }
-
-            public void onFailure(ParticleCloudException e) {
-                Log.e("SOME_TAG", e.getBestMessage());
-                Toaster.l(MainActivity.this, "Log out failed!");
-            }
-
-        });
 
     }
 
     public void getParticleDeviceListFromCloud() {
+
+
         Async.executeAsync(ParticleCloudSDK.getCloud(), new Async.ApiWork<ParticleCloud, List<io.particle.android.sdk.cloud.ParticleDevice>>() {
             public List<io.particle.android.sdk.cloud.ParticleDevice> callApi(ParticleCloud particleCloud) throws ParticleCloudException, IOException {
-                return particleCloud.getDevices();
+                return ParticleCloudSDK.getCloud().getDevices();
             }
 
             public void onSuccess(List<io.particle.android.sdk.cloud.ParticleDevice> devices) {
@@ -292,10 +257,11 @@ public class MainActivity extends AppCompatActivity {
 
             public void onFailure(ParticleCloudException e) {
                 Log.e("SOME_TAG", e.getBestMessage());
-                Toaster.l(MainActivity.this, "No device found");
+                Toaster.l(MainActivity.this, e.getBestMessage().toString());
                 mSwipeRefreshLayout.setRefreshing(false);
             }
         });
+
 
 
     }
@@ -303,6 +269,49 @@ public class MainActivity extends AppCompatActivity {
     public void startLoginActivity() {
         Intent intentLogin = new Intent(MainActivity.this, LoginActivity.class);
         MainActivity.this.startActivity(intentLogin);
+    }
+
+    private void AutoLogin() {
+        /**
+         * Can be deleted!
+         * Login is not needed on every startup.
+         * Maybe this code part is needed later.
+         *
+         */
+
+
+        SharedPreferences mPrefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+        //load stored email and password
+        final String email = mPrefs.getString(emailKey, null);
+        final String password = mPrefs.getString(passwordKey, null);
+
+        //Check if saved credentials are available
+        if ((email != null) && (password != null)) {
+            Async.executeAsync(ParticleCloudSDK.getCloud(), new Async.ApiWork<ParticleCloud, Void>() {
+
+                public Void callApi(ParticleCloud particleCloud) throws ParticleCloudException, IOException {
+                    particleCloud.logIn(email, password);
+                    return null;
+                }
+
+                public void onSuccess(Void aVoid) {
+                    //Toaster.l(MainActivity.this, "Logged in");
+                    getParticleDeviceListFromCloud();
+                }
+
+                public void onFailure(ParticleCloudException e) {
+                    Log.e("SOME_TAG", e.getBestMessage());
+                    Toaster.l(MainActivity.this, "Wrong credentials or no internet connectivity, please try again");
+                    mSwipeRefreshLayout.setRefreshing(false);
+                    startLoginActivity();
+                }
+
+            });
+        } else {
+            mSwipeRefreshLayout.setRefreshing(false);
+            startLoginActivity();
+
+        }
     }
 
 
@@ -323,9 +332,25 @@ public class MainActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
 
         switch (item.getItemId()) {
-            case R.id.logout:
+            case R.id.menu_logout:
                 logout();
                 return true;
+
+            case R.id.menu_refresh:
+                getParticleDeviceListFromCloud();
+                //show SwipeRefreshLayout onCreate till getParticleDeviceListFromCloud has been completed
+                mSwipeRefreshLayout.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mSwipeRefreshLayout.setRefreshing(true);
+                    }
+                });
+                return true;
+
+            case R.id.menu_settings:
+                return true;
+
+
 
             default:
                 return super.onOptionsItemSelected(item);

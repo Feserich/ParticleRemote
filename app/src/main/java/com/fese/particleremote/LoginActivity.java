@@ -22,6 +22,7 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import io.particle.android.sdk.cloud.ParticleCloud;
 import io.particle.android.sdk.cloud.ParticleCloudException;
+import io.particle.android.sdk.cloud.ParticleCloudSDK;
 import io.particle.android.sdk.utils.Async;
 import io.particle.android.sdk.utils.Toaster;
 
@@ -84,10 +85,7 @@ public class LoginActivity extends AppCompatActivity {
 
 
 
-
-
-
-        Async.executeAsync(ParticleCloud.get(LoginActivity.this), new Async.ApiWork<ParticleCloud, Void>() {
+        Async.executeAsync(ParticleCloudSDK.getCloud(), new Async.ApiWork<ParticleCloud, Void>() {
             public Void callApi(ParticleCloud particleCloud) throws ParticleCloudException, IOException {
                 particleCloud.logIn(email, password);
                 return null;
@@ -96,39 +94,36 @@ public class LoginActivity extends AppCompatActivity {
             public void onSuccess(Void aVoid) {
                 Toaster.l(LoginActivity.this, "Logged in");
 
+                /*
                 //store credentials
                 SharedPreferences mPrefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
                 SharedPreferences.Editor prefsEditor = mPrefs.edit();
                 prefsEditor.putString("email", email);
                 prefsEditor.putString("password", password);
                 prefsEditor.commit();
-                //TODO: Use OAuth from Particle with a token
-                //TODO: Generate a Key and encrypt the password.
-                //TODO: Use SecurePreferences: https://github.com/scottyab/secure-preferences.git
+
+                */
 
 
-                // start new activity...
+                progressDialog.dismiss();
+                _loginButton.setEnabled(true);
+
                 Intent intentMain = new Intent(LoginActivity.this, MainActivity.class);
                 LoginActivity.this.startActivity(intentMain);
+                finish();
             }
 
             public void onFailure(ParticleCloudException e) {
                 Log.e("SOME_TAG", e.getBestMessage());
-                Toaster.l(LoginActivity.this, "Wrong credentials or no internet connectivity, please try again");
+                progressDialog.dismiss();
+                onLoginFailed();
+
             }
 
         });
 
-        new android.os.Handler().postDelayed(
-                new Runnable() {
-                    public void run() {
-                        // On complete call either onLoginSuccess or onLoginFailed
-                        onLoginSuccess();
-                        // onLoginFailed();
-                        progressDialog.dismiss();
-                    }
-                }, 3000);
     }
+
 
 
 
@@ -138,10 +133,6 @@ public class LoginActivity extends AppCompatActivity {
         moveTaskToBack(true);
     }
 
-    public void onLoginSuccess() {
-        _loginButton.setEnabled(true);
-        finish();
-    }
 
     public void onLoginFailed() {
         Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();

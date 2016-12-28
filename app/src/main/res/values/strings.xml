@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ParticleRemote</string>
+    <string name="app_name">Particle Remote</string>
     <string name="title_activity_login">Sign in</string>
 
     <!-- Strings related to login -->
@@ -14,10 +14,12 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
-    <string name="logout">logout</string>
+    <string name="logout">Logout</string>
     <string name="action_settings">action_settings</string>
     <string name="title_function_dialog_list">"Select Function"</string>
     <string name="title_activity_relay_scrolling">RelayScrollingActivity</string>
+    <string name="refresh">Refresh</string>
+    <string name="settings">Settings</string>
 
 
     <string-array name="DOPins">

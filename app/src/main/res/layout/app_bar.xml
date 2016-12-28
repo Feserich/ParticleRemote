@@ -7,4 +7,5 @@
     android:background="@color/colorPrimary"
     android:elevation="4dp"
     android:id="@+id/app_bar"
-    app:theme="@style/ThemeOverlay.AppCompat.Dark"/>
+    android:theme="@style/AppTheme.AppBarOverlay"
+    />

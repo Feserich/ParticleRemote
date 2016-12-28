@@ -63,8 +63,7 @@ public class TempHoneywellActivity extends AppCompatActivity {
         ts_targetTemp.setFactory(new ViewSwitcher.ViewFactory() {
 
             public View makeView() {
-                // TODO Auto-generated method stub
-                // create new textView and set the properties like clolr, size etc
+                // create new textView and set the properties like color, size etc
                 TextView myText = new TextView(TempHoneywellActivity.this);
                 myText.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
                 myText.setTextSize(92);
