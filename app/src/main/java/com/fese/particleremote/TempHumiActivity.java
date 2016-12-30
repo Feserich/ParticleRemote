@@ -1,11 +1,14 @@
 package com.fese.particleremote;
 
 import android.graphics.Color;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.LineChart;
@@ -25,7 +28,7 @@ import java.util.ArrayList;
 import io.particle.android.sdk.cloud.*;
 import io.particle.android.sdk.cloud.ParticleDevice;
 import io.particle.android.sdk.utils.Async;
-import io.particle.android.sdk.utils.Toaster;
+
 
 public class TempHumiActivity extends AppCompatActivity {
     private TextView temperatureTV;
@@ -39,6 +42,7 @@ public class TempHumiActivity extends AppCompatActivity {
     private LineChart tempHumiChart;
     private ArrayList<ILineDataSet> dataSets;
     final android.os.Handler handler = new android.os.Handler();
+    private View viewTempHumi;
 
 
     private static final int REFRESH_CYCLE = 5000;          //unit: [ms]
@@ -55,6 +59,7 @@ public class TempHumiActivity extends AppCompatActivity {
 
         temperatureTV = (TextView)findViewById(R.id.tv_temperature);
         humidityTV = (TextView)findViewById(R.id.tv_humidity);
+        viewTempHumi = (RelativeLayout) findViewById(R.id.RelLay_tempHumi);
 
         //Init Line Chart
         tempHumiChart = (LineChart) findViewById(R.id.tempHumiChart);
@@ -107,19 +112,27 @@ public class TempHumiActivity extends AppCompatActivity {
 
                     catch (ParticleDevice.VariableDoesNotExistException e){
                         //Log.e("SOME_TAG", e.getMessage().toString());
-                        Toaster.l(TempHumiActivity.this, e.getMessage().toString());
+                        Snackbar snackbarError = Snackbar
+                                .make(viewTempHumi, e.getMessage().toString(), Snackbar.LENGTH_LONG);
+                        snackbarError.show();
                     }
 
                     return success;
                 }
 
                 public void onSuccess(Boolean onSuccess) {
-                    addTempHumiValueToChart(temperatureVal, humidityVal);
-                    setValuesToEditText();
+                    if (onSuccess){
+                        addTempHumiValueToChart(temperatureVal, humidityVal);
+                        setValuesToEditText();
+                    }
+
                 }
 
                 public void onFailure(ParticleCloudException e) {
                     Log.e("SOME_TAG", e.getBestMessage());
+                    Snackbar snackbarError = Snackbar
+                            .make(viewTempHumi, e.getBestMessage(), Snackbar.LENGTH_LONG);
+                    snackbarError.show();
 
                 }
 
@@ -244,7 +257,9 @@ public class TempHumiActivity extends AppCompatActivity {
 
             public void onFailure(ParticleCloudException e) {
                 Log.e("SOME_TAG", e.getBestMessage());
-                Toaster.l(TempHumiActivity.this, e.getBestMessage());
+                Snackbar snackbarError = Snackbar
+                        .make(viewTempHumi, e.getBestMessage(), Snackbar.LENGTH_LONG);
+                snackbarError.show();
             }
 
         });

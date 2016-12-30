@@ -36,6 +36,7 @@ dependencies {
     compile 'com.android.support:design:23.1.1'
 
     compile 'io.particle:cloudsdk:0.3.4'
+    compile 'io.particle:devicesetup:0.3.6'
     compile 'com.jakewharton:butterknife:6.1.0'
     compile 'org.adw.library:discrete-seekbar:1.0.1'
     compile 'net.steamcrafted:load-toast:1.0.10'

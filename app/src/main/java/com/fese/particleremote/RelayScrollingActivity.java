@@ -35,7 +35,7 @@ import java.util.List;
 import io.particle.android.sdk.cloud.*;
 import io.particle.android.sdk.cloud.ParticleDevice;
 import io.particle.android.sdk.utils.Async;
-import io.particle.android.sdk.utils.Toaster;
+
 
 public class RelayScrollingActivity extends AppCompatActivity {
 
@@ -103,7 +103,9 @@ public class RelayScrollingActivity extends AppCompatActivity {
                         success = particleDevice.callFunction("toggleRelay",functionCommandList);
 
                     } catch (io.particle.android.sdk.cloud.ParticleDevice.FunctionDoesNotExistException e) {
-                        Toaster.l(RelayScrollingActivity.this, "Function doesn't exist!");
+                        Snackbar snackbarError = Snackbar
+                                .make(recyclerView, e.getMessage().toString(), Snackbar.LENGTH_LONG);
+                        snackbarError.show();
                         relay.tryToSwitch = false;
                     }
 
@@ -118,17 +120,23 @@ public class RelayScrollingActivity extends AppCompatActivity {
                         }
                         relay.tryToSwitch = false;
 
-
-
                     }
                     else if (returnValue == -1){
                         relay.tryToSwitch = false;
-                        Toaster.l(RelayScrollingActivity.this, "Relay out of limit");
+                        Snackbar snackbarError = Snackbar
+                                .make(recyclerView, "Relay out of limit", Snackbar.LENGTH_LONG);
+                        snackbarError.show();
                     }
                     else if (returnValue == -2){
                         relay.tryToSwitch = false;
-                        Toaster.l(RelayScrollingActivity.this, "Wrong command");
+                        Snackbar snackbarError = Snackbar
+                                .make(recyclerView, "Wrong command", Snackbar.LENGTH_LONG);
+                        snackbarError.show();
                     }
+                    else {
+                        relay.tryToSwitch = false;
+                    }
+
 
                     recyclerView.getAdapter().notifyDataSetChanged();
                     storeRelays();
@@ -138,7 +146,9 @@ public class RelayScrollingActivity extends AppCompatActivity {
                 public void onFailure(ParticleCloudException e) {
                     relay.tryToSwitch = false;
                     Log.e("SOME_TAG", e.getBestMessage());
-                    Toaster.l(RelayScrollingActivity.this, e.getBestMessage());
+                    Snackbar snackbarError = Snackbar
+                            .make(recyclerView, e.getBestMessage(), Snackbar.LENGTH_LONG);
+                    snackbarError.show();
                     recyclerView.getAdapter().notifyDataSetChanged();
                 }
 
@@ -146,7 +156,9 @@ public class RelayScrollingActivity extends AppCompatActivity {
             });
         }
         else {
-            Toaster.l(RelayScrollingActivity.this, "Wait a sec!");
+            Snackbar snackbarWait = Snackbar
+                    .make(recyclerView, "Wait a sec!", Snackbar.LENGTH_LONG);
+            snackbarWait.show();
         }
 
 
@@ -170,7 +182,9 @@ public class RelayScrollingActivity extends AppCompatActivity {
 
             public void onFailure(ParticleCloudException e) {
                 Log.e("SOME_TAG", e.getBestMessage());
-                Toaster.l(RelayScrollingActivity.this, e.getBestMessage());
+                Snackbar snackbarError = Snackbar
+                        .make(recyclerView, e.getBestMessage(), Snackbar.LENGTH_LONG);
+                snackbarError.show();
             }
 
         });
@@ -351,7 +365,7 @@ public class RelayScrollingActivity extends AppCompatActivity {
 
 
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_newRelay);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

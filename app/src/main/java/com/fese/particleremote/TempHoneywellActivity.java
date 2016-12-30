@@ -1,5 +1,6 @@
 package com.fese.particleremote;
 
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -9,6 +10,7 @@ import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
@@ -23,7 +25,8 @@ import java.util.ArrayList;
 import io.particle.android.sdk.cloud.*;
 import io.particle.android.sdk.cloud.ParticleDevice;
 import io.particle.android.sdk.utils.Async;
-import io.particle.android.sdk.utils.Toaster;
+
+
 
 public class TempHoneywellActivity extends AppCompatActivity {
 
@@ -34,6 +37,7 @@ public class TempHoneywellActivity extends AppCompatActivity {
     private int targetTemp = 0;
     public static final int LOWEST_TARGET_TEMP_VALUE = 13;
     private LoadToast setTempToast;
+    private View viewHoneywell;
 
 
     @Override
@@ -49,6 +53,7 @@ public class TempHoneywellActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
+        viewHoneywell = (RelativeLayout) findViewById(R.id.activity_temp_honeywell);
 
 
         btn_setTemp = (Button)findViewById(R.id.btn_setTargetTemp);
@@ -148,8 +153,10 @@ public class TempHoneywellActivity extends AppCompatActivity {
                         success = particleDevice.callFunction("setTempHoney",functionCommandList);
 
                     } catch (io.particle.android.sdk.cloud.ParticleDevice.FunctionDoesNotExistException e) {
-                        Toaster.l(TempHoneywellActivity.this, e.toString());
-                        setTempToast.error();
+                        Snackbar snackbarError = Snackbar
+                                .make(viewHoneywell, e.getMessage().toString(), Snackbar.LENGTH_LONG);
+                        snackbarError.show();
+
                     }
 
                     return success;
@@ -157,20 +164,30 @@ public class TempHoneywellActivity extends AppCompatActivity {
 
 
                 public void onSuccess(Integer returnValue) {
+
                     switch (returnValue){
                         case 1:
                             setTempToast.success();
                             break;
                         case -1:
+                            Snackbar snackbarError1 = Snackbar
+                                    .make(viewHoneywell, "Wrong response!", Snackbar.LENGTH_LONG);
+                            snackbarError1.show();
                             setTempToast.error();
-                            Toaster.l(TempHoneywellActivity.this, "Wrong response!");
                             break;
                         case -2:
-                            Toaster.l(TempHoneywellActivity.this, "Read Buffer Overflow!");
+                            Snackbar snackbarError2 = Snackbar
+                                    .make(viewHoneywell, "Read Buffer Overflow!", Snackbar.LENGTH_LONG);
+                            snackbarError2.show();
                             setTempToast.error();
                             break;
                         case -3:
-                            Toaster.l(TempHoneywellActivity.this, "TimeOut!");
+                            Snackbar snackbarError3 = Snackbar
+                                    .make(viewHoneywell, "TimeOut!", Snackbar.LENGTH_LONG);
+                            snackbarError3.show();
+                            setTempToast.error();
+                            break;
+                        default:
                             setTempToast.error();
                             break;
                     }
@@ -180,15 +197,22 @@ public class TempHoneywellActivity extends AppCompatActivity {
 
                 public void onFailure(ParticleCloudException e) {
                     Log.e("SOME_TAG", e.getBestMessage());
+                    Snackbar snackbarError = Snackbar
+                            .make(viewHoneywell, e.getBestMessage(), Snackbar.LENGTH_LONG);
+                    snackbarError.show();
                     setTempToast.error();
-                    Toaster.l(TempHoneywellActivity.this, e.getBestMessage());
+
                 }
 
             });
         }
         else {
-            Toaster.l(TempHoneywellActivity.this, "Wait a sec!");
+            Snackbar snackbarWait = Snackbar
+                    .make(viewHoneywell, "Wait a sec!", Snackbar.LENGTH_LONG);
+            snackbarWait.show();
         }
+
+
 
     }
 
@@ -210,7 +234,9 @@ public class TempHoneywellActivity extends AppCompatActivity {
 
             public void onFailure(ParticleCloudException e) {
                 Log.e("SOME_TAG", e.getBestMessage());
-                Toaster.l(TempHoneywellActivity.this, e.getBestMessage());
+                Snackbar snackbarError = Snackbar
+                        .make(viewHoneywell, e.getBestMessage(), Snackbar.LENGTH_LONG);
+                snackbarError.show();
             }
 
         });

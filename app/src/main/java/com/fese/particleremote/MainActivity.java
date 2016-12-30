@@ -1,10 +1,10 @@
 package com.fese.particleremote;
 
-import android.content.Context;
 import android.content.Intent;
 
 import android.content.SharedPreferences;
-import android.os.Handler;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,27 +17,22 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
-
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import io.particle.android.sdk.cloud.ParticleCloud;
 import io.particle.android.sdk.cloud.ParticleCloudException;
 import io.particle.android.sdk.cloud.ParticleCloudSDK;
+import io.particle.android.sdk.devicesetup.ParticleDeviceSetupLibrary;
 import io.particle.android.sdk.utils.Async;
-import io.particle.android.sdk.utils.Toaster;
+
 
 public class MainActivity extends AppCompatActivity {
-
-
-
-    private String emailKey = "email";  private String passwordKey = "password";
 
     private RecyclerView rv;
     private SwipeRefreshLayout mSwipeRefreshLayout;
@@ -77,7 +72,9 @@ public class MainActivity extends AppCompatActivity {
                 if (RVdevices != null) {
                     for (ParticleDevice device : RVdevices) {
                         if (deviceID.equals("test device")) {
-                            Toaster.l(MainActivity.this, "Selected device is a virtual test device!");
+                            Snackbar snackbarInfo = Snackbar
+                                    .make(rv, "Selected device is a virtual test device!", Snackbar.LENGTH_LONG);
+                            snackbarInfo.show();
                         }
                         else if (device.deviceID.equals(deviceID)) {
                             startParticleFunctionDialog(deviceID);
@@ -105,9 +102,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //Setup a new Particle Device
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_setupDevice);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ParticleDeviceSetupLibrary.startDeviceSetup(MainActivity.this);
+            }
+        });
+
 
         //call Method on Create
         ParticleCloudSDK.init(this);
+        ParticleDeviceSetupLibrary.init(this.getApplicationContext(), MainActivity.class);
         checkLoginStatus();
         initializeParticleDeviceFunctions();
 
@@ -119,6 +126,10 @@ public class MainActivity extends AppCompatActivity {
     private void initializeTestDeviceList() {
         RVdevices.add(new ParticleDevice("*Electron Test Device", "test device", "ELECTRON", false));
         RVdevices.add(new ParticleDevice("*Core Test Device", "test device", "CORE", true));
+        RVdevices.add(new ParticleDevice("*Electron Test Device", "test device", "ELECTRON", false));
+        RVdevices.add(new ParticleDevice("*Electron Test Device", "test device", "ELECTRON", false));
+        RVdevices.add(new ParticleDevice("*Electron Test Device", "test device", "ELECTRON", false));
+        RVdevices.add(new ParticleDevice("*Electron Test Device", "test device", "ELECTRON", false));
 
 
     }
@@ -156,7 +167,9 @@ public class MainActivity extends AppCompatActivity {
                                 MainActivity.this.startActivity(intentTempHoneywell);
                                 break;
                             case 3:
-                                Toaster.l(MainActivity.this, "Coming soon...");
+                                Snackbar snackbarInfo = Snackbar
+                                        .make(rv, "Comming soon...", Snackbar.LENGTH_LONG);
+                                snackbarInfo.show();
                                 break;
 
                         }
@@ -249,7 +262,10 @@ public class MainActivity extends AppCompatActivity {
 
             public void onFailure(ParticleCloudException e) {
                 Log.e("SOME_TAG", e.getBestMessage());
-                Toaster.l(MainActivity.this, e.getBestMessage().toString());
+
+                Snackbar snackbarError = Snackbar
+                        .make(rv, e.getBestMessage(), Snackbar.LENGTH_LONG);
+                snackbarError.show();
                 mSwipeRefreshLayout.setRefreshing(false);
             }
         });
