@@ -43,6 +43,7 @@ public class LoginActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_login);
         ButterKnife.inject(this);
+        ParticleCloudSDK.init(this);
 
         _loginButton.setOnClickListener(new View.OnClickListener() {
 

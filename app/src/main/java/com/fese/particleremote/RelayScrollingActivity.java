@@ -68,6 +68,7 @@ public class RelayScrollingActivity extends AppCompatActivity {
 
         //call Methods onCreate
         Log.d(TAG,"Start onCreate");
+        ParticleCloudSDK.init(this);
         initializeRelayScrollingActivityAndOnClickListener();
         getParticleDeviceInstance();
         loadStoredRelays();

@@ -97,7 +97,7 @@ public class TempHoneywellActivity extends AppCompatActivity {
 
 
 
-
+        ParticleCloudSDK.init(this);
         getParticleDeviceInstance();
     }
 

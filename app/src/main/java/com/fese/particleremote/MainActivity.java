@@ -37,8 +37,8 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    private String emailKey = "email";
-    private String passwordKey = "password";
+    private String emailKey = "email";  private String passwordKey = "password";
+
     private RecyclerView rv;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private String[] ParticleFunctions = new String[4];
@@ -71,9 +71,6 @@ public class MainActivity extends AppCompatActivity {
         rv.setAdapter(adapter);
 
 
-
-
-
         RVAdapter.DeviceViewHolder.setOnParticleDeviceClickedListener(new RVAdapter.OnParticleDeviceClickedListener() {
             @Override
             public void onParticleDeviceClicked(String deviceID) {
@@ -83,7 +80,6 @@ public class MainActivity extends AppCompatActivity {
                             Toaster.l(MainActivity.this, "Selected device is a virtual test device!");
                         }
                         else if (device.deviceID.equals(deviceID)) {
-                            //TODO: show hint if device is offline
                             startParticleFunctionDialog(deviceID);
                         }
 
@@ -101,7 +97,6 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-
         //show SwipeRefreshLayout onCreate till getParticleDeviceListFromCloud has been completed
         mSwipeRefreshLayout.post(new Runnable() {
             @Override
@@ -109,8 +104,6 @@ public class MainActivity extends AppCompatActivity {
                 mSwipeRefreshLayout.setRefreshing(true);
             }
         });
-
-
 
 
         //call Method on Create
@@ -137,7 +130,6 @@ public class MainActivity extends AppCompatActivity {
         ParticleFunctions[2] = "Set Honeywell temperature";
         ParticleFunctions[3] = "Send commands over 433Mhz radio";
     }
-
 
     private void startParticleFunctionDialog(final String deviceID){
 
@@ -269,49 +261,6 @@ public class MainActivity extends AppCompatActivity {
     public void startLoginActivity() {
         Intent intentLogin = new Intent(MainActivity.this, LoginActivity.class);
         MainActivity.this.startActivity(intentLogin);
-    }
-
-    private void AutoLogin() {
-        /**
-         * Can be deleted!
-         * Login is not needed on every startup.
-         * Maybe this code part is needed later.
-         *
-         */
-
-
-        SharedPreferences mPrefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
-        //load stored email and password
-        final String email = mPrefs.getString(emailKey, null);
-        final String password = mPrefs.getString(passwordKey, null);
-
-        //Check if saved credentials are available
-        if ((email != null) && (password != null)) {
-            Async.executeAsync(ParticleCloudSDK.getCloud(), new Async.ApiWork<ParticleCloud, Void>() {
-
-                public Void callApi(ParticleCloud particleCloud) throws ParticleCloudException, IOException {
-                    particleCloud.logIn(email, password);
-                    return null;
-                }
-
-                public void onSuccess(Void aVoid) {
-                    //Toaster.l(MainActivity.this, "Logged in");
-                    getParticleDeviceListFromCloud();
-                }
-
-                public void onFailure(ParticleCloudException e) {
-                    Log.e("SOME_TAG", e.getBestMessage());
-                    Toaster.l(MainActivity.this, "Wrong credentials or no internet connectivity, please try again");
-                    mSwipeRefreshLayout.setRefreshing(false);
-                    startLoginActivity();
-                }
-
-            });
-        } else {
-            mSwipeRefreshLayout.setRefreshing(false);
-            startLoginActivity();
-
-        }
     }
 
 

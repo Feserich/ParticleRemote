@@ -7,18 +7,20 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
-import android.widget.Toolbar;
 
 import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
 
 import io.particle.android.sdk.cloud.*;
 import io.particle.android.sdk.cloud.ParticleDevice;
@@ -34,9 +36,17 @@ public class TempHumiActivity extends AppCompatActivity {
     private String CloudVariableHumi = "humidity";
     double temperatureVal;
     double humidityVal;
-    private boolean loopMeasurement = false;
     private LineChart tempHumiChart;
-    private static final int REFRESH_CYCLE = 3000;          //unit: [ms]
+    private ArrayList<ILineDataSet> dataSets;
+    final android.os.Handler handler = new android.os.Handler();
+
+
+    private static final int REFRESH_CYCLE = 5000;          //unit: [ms]
+    private static final float MIN_TEMPERATURE_DEFAULT_VALUE = 10;
+    private static final float MAX_TEMPERATURE_DEFAULT_VALUE = 30;
+    private static final float MIN_HUMIDITY_DEFAULT_VALUE = 0;
+    private static final float MAX_HUMIDITY_DEFAULT_VALUE = 100;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,36 +56,39 @@ public class TempHumiActivity extends AppCompatActivity {
         temperatureTV = (TextView)findViewById(R.id.tv_temperature);
         humidityTV = (TextView)findViewById(R.id.tv_humidity);
 
+        //Init Line Chart
         tempHumiChart = (LineChart) findViewById(R.id.tempHumiChart);
-        LineData data = new LineData();
+        dataSets = new ArrayList<ILineDataSet>();
+        LineData data = new LineData(dataSets);
         tempHumiChart.setData(data);
+        tempHumiChart.getDescription().setEnabled(false);
 
-        Legend l = tempHumiChart.getLegend();
+        //Format the humidity yAxis
+        YAxis yAxisRight = tempHumiChart.getAxisRight();
+        yAxisRight.setValueFormatter(new MyYAxisHumidityFormatter());
+        yAxisRight.setAxisMinimum(MIN_HUMIDITY_DEFAULT_VALUE);
+        yAxisRight.setAxisMaximum(MAX_HUMIDITY_DEFAULT_VALUE);
+        yAxisRight.setLabelCount(11, true);
 
+        //Format the temperature yAxis
+        YAxis yAxisLeft = tempHumiChart.getAxisLeft();
+        yAxisLeft.setLabelCount(11, true);
+        yAxisLeft.setAxisMinimum(MIN_TEMPERATURE_DEFAULT_VALUE);
+        yAxisLeft.setAxisMaximum(MAX_TEMPERATURE_DEFAULT_VALUE);
+        yAxisLeft.setValueFormatter(new MyYAxisTemperatureFormatter());
 
-        //TODO: Detect if activity has been stopped or paused then set loopMeasurement = false
-        loopMeasurement = true;
-
+        //set toolbar and navigate up arrow
         android.support.v7.widget.Toolbar toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.app_bar);
         setSupportActionBar(toolbar);
-
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
         //call Methods
+        ParticleCloudSDK.init(this);
         getParticleDeviceInstance();
         getTemperatureAndHumidity();
 
-        //TODO: Runnable to Refresh the Data automaticly
-        final android.os.Handler refreshValHandler = new android.os.Handler();
-        refreshValHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                getTemperatureAndHumidity();
-            }
-        }, REFRESH_CYCLE);
     }
-
 
 
     private void getTemperatureAndHumidity(){
@@ -93,24 +106,15 @@ public class TempHumiActivity extends AppCompatActivity {
                     }
 
                     catch (ParticleDevice.VariableDoesNotExistException e){
-                        Toaster.l(TempHumiActivity.this, "Error reading variable!");
+                        //Log.e("SOME_TAG", e.getMessage().toString());
+                        Toaster.l(TempHumiActivity.this, e.getMessage().toString());
                     }
 
                     return success;
                 }
 
                 public void onSuccess(Boolean onSuccess) {
-                    addChartEntry(temperatureVal);
-                    if (onSuccess && loopMeasurement) {
-                        final android.os.Handler refreshValHandler = new android.os.Handler();
-                        refreshValHandler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                getTemperatureAndHumidity();
-                            }
-                        }, REFRESH_CYCLE);
-                    }
-
+                    addTempHumiValueToChart(temperatureVal, humidityVal);
                     setValuesToEditText();
                 }
 
@@ -127,7 +131,6 @@ public class TempHumiActivity extends AppCompatActivity {
 
     }
 
-
     public void setValuesToEditText(){
         temperatureVal = (double)Math.round(temperatureVal * 100)/ 100d;
         humidityVal = (double)Math.round(humidityVal * 100)/ 100d;
@@ -136,28 +139,44 @@ public class TempHumiActivity extends AppCompatActivity {
         humidityTV.setText("Humidity: " + String.valueOf(humidityVal) + "%");
     }
 
+    public void addTempHumiValueToChart(double temperatureValueX, double humidityValueX){
 
-    public void addChartEntry(double tempValueX){
         LineData data = tempHumiChart.getData();
 
         if (data != null) {
+            ILineDataSet tempSet = data.getDataSetByIndex(0);
 
-            ILineDataSet set = data.getDataSetByIndex(0);
-            // set.addEntry(...); // can be called as well
+            if (tempSet == null) {
+                tempSet = createTemperatureSet();
+                dataSets.add(tempSet);
 
-            if (set == null) {
-                set = createSet();
-                data.addDataSet(set);
             }
 
-            data.addEntry(new Entry(set.getEntryCount() * (REFRESH_CYCLE/1000), (float) tempValueX), 0);
+            ILineDataSet humiSet = data.getDataSetByIndex(1);
+
+            if (humiSet == null) {
+                humiSet = createHumiditySet();
+                dataSets.add(humiSet);
+            }
+
+            if (temperatureValueX < MIN_TEMPERATURE_DEFAULT_VALUE){
+                YAxis yAxisLeft = tempHumiChart.getAxisLeft();
+                yAxisLeft.resetAxisMinimum();
+            }
+            else if (temperatureValueX > MAX_TEMPERATURE_DEFAULT_VALUE){
+                YAxis yAxisLeft = tempHumiChart.getAxisLeft();
+                yAxisLeft.resetAxisMaximum();
+            }
+
+            data.addEntry(new Entry(tempSet.getEntryCount() * (REFRESH_CYCLE/1000), (float) temperatureValueX), 0);
+            data.addEntry(new Entry(humiSet.getEntryCount() * (REFRESH_CYCLE/1000), (float) humidityValueX), 1);
             data.notifyDataChanged();
 
             // let the chart know it's data has changed
             tempHumiChart.notifyDataSetChanged();
 
             // limit the number of visible entries
-            tempHumiChart.setVisibleXRangeMaximum(120);
+            tempHumiChart.setVisibleXRangeMaximum(3600);
             // tempHumiChart.setVisibleYRange(30, AxisDependency.LEFT);
 
             // move to the latest entry
@@ -166,18 +185,38 @@ public class TempHumiActivity extends AppCompatActivity {
             // this automatically refreshes the chart (calls invalidate())
             // mChart.moveViewTo(data.getXValCount()-7, 55f,
             // AxisDependency.LEFT);
+
         }
 
     }
 
-    private LineDataSet createSet(){
-        LineDataSet set = new LineDataSet(null, "Dynamic Data");
+    private LineDataSet createTemperatureSet(){
+        LineDataSet set = new LineDataSet(null, "Temperature [°C]");
         set.setAxisDependency(YAxis.AxisDependency.LEFT);
-        set.setColor(ColorTemplate.getHoloBlue());
-        set.setCircleColor(Color.WHITE);
+        set.setColor(ColorTemplate.MATERIAL_COLORS[1]);
+        //set.setCircleColor(Color.WHITE);
+        set.setDrawCircles(false);
         set.setMode(LineDataSet.Mode.CUBIC_BEZIER);
         set.setLineWidth(2f);
-        set.setCircleRadius(4f);
+        //set.setCircleRadius(4f);
+        set.setFillAlpha(65);
+        set.setFillColor(ColorTemplate.getHoloBlue());
+        set.setHighLightColor(Color.rgb(244, 117, 117));
+        set.setValueTextColor(Color.WHITE);
+        set.setValueTextSize(9f);
+        set.setDrawValues(false);
+        return set;
+    }
+
+    private LineDataSet createHumiditySet(){
+        LineDataSet set = new LineDataSet(null, "Humidity [%]");
+        set.setAxisDependency(YAxis.AxisDependency.RIGHT);
+        set.setColor(ColorTemplate.MATERIAL_COLORS[3]);
+        //set.setCircleColor(Color.WHITE);
+        set.setDrawCircles(false);
+        set.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+        set.setLineWidth(2f);
+        //set.setCircleRadius(4f);
         set.setFillAlpha(65);
         set.setFillColor(ColorTemplate.getHoloBlue());
         set.setHighLightColor(Color.rgb(244, 117, 117));
@@ -212,6 +251,30 @@ public class TempHumiActivity extends AppCompatActivity {
 
     }
 
+    private Runnable getNewValuesRunnable = new Runnable() {
+        @Override
+        public void run() {
+
+            getTemperatureAndHumidity();
+            handler.postDelayed(getNewValuesRunnable, REFRESH_CYCLE);
+
+        }
+    };
+
+    @Override
+    protected void onPause() {
+        handler.removeCallbacks(getNewValuesRunnable);
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume()
+    {
+
+        handler.post(getNewValuesRunnable);
+        super.onResume();
+    }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -221,7 +284,6 @@ public class TempHumiActivity extends AppCompatActivity {
 
         switch (item.getItemId()) {
             case R.id.home:
-                loopMeasurement = false;
                 NavUtils.navigateUpFromSameTask(this);
                 return true;
 
@@ -230,5 +292,37 @@ public class TempHumiActivity extends AppCompatActivity {
         }
 
 
+    }
+}
+
+class MyYAxisTemperatureFormatter implements IAxisValueFormatter {
+
+    private DecimalFormat mFormat;
+
+    public MyYAxisTemperatureFormatter () {
+        mFormat = new DecimalFormat("###,###,##0.0"); // use one decimal
+    }
+
+    @Override
+    public String getFormattedValue(float value, AxisBase axis) {
+        // write your logic here
+        // access the YAxis object to get more information
+        return mFormat.format(value) + " °C"; // e.g. append a dollar-sign
+    }
+}
+
+class MyYAxisHumidityFormatter implements IAxisValueFormatter {
+
+    private DecimalFormat mFormat;
+
+    public MyYAxisHumidityFormatter () {
+        mFormat = new DecimalFormat("###,###,##0"); // use no decimal
+    }
+
+    @Override
+    public String getFormattedValue(float value, AxisBase axis) {
+        // write your logic here
+        // access the YAxis object to get more information
+        return mFormat.format(value) + " %"; // e.g. append a dollar-sign
     }
 }
