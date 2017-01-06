@@ -1,5 +1,7 @@
 package com.fese.particleremote;
 
+import android.content.SharedPreferences;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -7,13 +9,21 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
+
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
+
 import net.steamcrafted.loadtoast.LoadToast;
 
 
@@ -32,10 +42,13 @@ public class TempHoneywellActivity extends AppCompatActivity {
 
     private String myParticleID;
     private ParticleDevice myParticleDevice;
-    private Button btn_setTemp;
     private TextSwitcher ts_targetTemp;
+    private SharedPreferences honeywellTemperaturesValuesSharedPref;
     private int targetTemp = 0;
-    public static final int LOWEST_TARGET_TEMP_VALUE = 13;
+    private static final int LOWEST_TARGET_TEMP_VALUE = 13;             //the lowest temperature value on the seekbar. Honeywell is set to OFF
+    private static final String HONEYWELL_OFF_VALUE = "75";
+    private static int ComfortTemperatureValue = 22;
+    private static int NightTemperatureValue = 18;
     private LoadToast setTempToast;
     private View viewHoneywell;
 
@@ -55,15 +68,25 @@ public class TempHoneywellActivity extends AppCompatActivity {
 
         viewHoneywell = (RelativeLayout) findViewById(R.id.activity_temp_honeywell);
 
+        honeywellTemperaturesValuesSharedPref = getPreferences(MODE_PRIVATE);
 
-        btn_setTemp = (Button)findViewById(R.id.btn_setTargetTemp);
+        Button btn_setTemp = (Button)findViewById(R.id.btn_setTargetTemp);
         ts_targetTemp = (TextSwitcher)findViewById(R.id.ts_targetTemp);
+
+        Button btn_setTempOff = (Button)findViewById(R.id.btn_tempOff);
+        Button btn_setTempComfort = (Button)findViewById(R.id.btn_tempComfort);
+        Button btn_setTempNight = (Button)findViewById(R.id.btn_tempNight);
 
         setTempToast = new LoadToast(this);
         setTempToast.setText("Setting temperature...");
         //setTempToast.setTranslationY(200);                //translation in pixels
 
         btn_setTemp.setOnClickListener(setTempOnClick);
+        btn_setTempOff.setOnClickListener(setTempOffOnClick);
+        btn_setTempComfort.setOnClickListener(setTempComfortOnClick);
+        btn_setTempNight.setOnClickListener(setTempNightOnClick);
+
+
 
         ts_targetTemp.setFactory(new ViewSwitcher.ViewFactory() {
 
@@ -72,7 +95,7 @@ public class TempHoneywellActivity extends AppCompatActivity {
                 TextView myText = new TextView(TempHoneywellActivity.this);
                 myText.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
                 myText.setTextSize(92);
-                myText.setText(String.valueOf(targetTemp));
+                myText.setText(String.valueOf(targetTemp));                             //TODO: set Unknown Temp or save last targetTemp
                 //myText.setTextColor(Color.BLUE);
                 return myText;
             }
@@ -84,56 +107,22 @@ public class TempHoneywellActivity extends AppCompatActivity {
             @Override
             public int transform(int value) {
                 targetTemp = value;
-                switch (targetTemp){
-                    case 13: ts_targetTemp.setText("OFF");
-                        break;
-
-                    case 27: ts_targetTemp.setText("ON");
-                        break;
-
-                    default: ts_targetTemp.setText(String.valueOf(targetTemp) + " °C");
-                        break;
-
-                }
+                setTextSwitchTemperature(value);
                 
                 return value;
             }
         });
 
 
-
+        //call Method on Create
         ParticleCloudSDK.init(this);
         getParticleDeviceInstance();
-    }
+        loadValueSettings();
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            // Respond to the action bar's Up/Home button
-            case android.R.id.home:
-                NavUtils.navigateUpFromSameTask(this);
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
 
-    View.OnClickListener setTempOnClick = new View.OnClickListener(){
-        @Override
-        public void onClick(View v) {
-            //float targetTemp_f = Float.valueOf();
-            //int targetTempRaw = Math.round(targetTemp_f * 10);
-            if (targetTemp == LOWEST_TARGET_TEMP_VALUE) {
-                setTemperature("75");                                   //value to set Honeywell to OFF
-            }
-            else {
-                setTemperature(String.valueOf(targetTemp * 10));
-            }
 
-
-        }
-
-        };
 
     private void setTemperature(final String targetTempRAW){
         if (myParticleDevice != null){
@@ -216,6 +205,22 @@ public class TempHoneywellActivity extends AppCompatActivity {
 
     }
 
+    private void setTextSwitchTemperature (int temperatureValue) {
+
+        switch (temperatureValue){
+            case LOWEST_TARGET_TEMP_VALUE: ts_targetTemp.setText("OFF");
+                break;
+
+            case 27: ts_targetTemp.setText("ON");
+                break;
+
+            default: ts_targetTemp.setText(String.valueOf(temperatureValue) + " °C");
+                break;
+
+        }
+
+    }
+
     private void getParticleDeviceInstance(){
 
         //get the ID of the selected Particle Device from the MainActivity
@@ -242,5 +247,93 @@ public class TempHoneywellActivity extends AppCompatActivity {
         });
 
     }
+
+    //TODO: Edit temperatures for comfort and night mode in settings
+
+    private void storeValueSettings() {
+        SharedPreferences.Editor prefsEditor = honeywellTemperaturesValuesSharedPref.edit();
+        prefsEditor.putInt("Night Mode Temperature Value", NightTemperatureValue);
+        prefsEditor.putInt("Comfort Temperature Value", ComfortTemperatureValue);
+        prefsEditor.apply();
+    }
+
+    private void loadValueSettings() {
+        Integer night = honeywellTemperaturesValuesSharedPref.getInt("Night Mode Temperature Value", -1);
+        Integer comfort = honeywellTemperaturesValuesSharedPref.getInt("Comfort Temperature Value", -1);
+
+        NightTemperatureValue = (night == -1) ? NightTemperatureValue : night;
+        ComfortTemperatureValue = (comfort == -1) ? ComfortTemperatureValue : comfort;
+    }
+
+
+
+    View.OnClickListener setTempOnClick = new View.OnClickListener(){
+        @Override
+        public void onClick(View v) {
+            //float targetTemp_f = Float.valueOf();
+            //int targetTempRaw = Math.round(targetTemp_f * 10);
+            if (targetTemp == LOWEST_TARGET_TEMP_VALUE) {
+                setTemperature(HONEYWELL_OFF_VALUE);                                   //value to set Honeywell to OFF
+            }
+            else {
+                setTemperature(String.valueOf(targetTemp * 10));
+            }
+
+
+        }
+
+    };
+
+    View.OnClickListener setTempOffOnClick = new View.OnClickListener(){
+        @Override
+        public void onClick(View v) {
+            setTemperature(HONEYWELL_OFF_VALUE);
+            setTextSwitchTemperature(LOWEST_TARGET_TEMP_VALUE);                         //value to set Honeywell to OFF
+        }
+
+    };
+
+    View.OnClickListener setTempComfortOnClick = new View.OnClickListener(){
+        @Override
+        public void onClick(View v) {
+            setTemperature(String.valueOf(ComfortTemperatureValue * 10));               //multiple 10 for RAW value
+            setTextSwitchTemperature(ComfortTemperatureValue);
+        }
+
+    };
+
+    View.OnClickListener setTempNightOnClick = new View.OnClickListener(){
+        @Override
+        public void onClick(View v) {
+            setTemperature(String.valueOf(NightTemperatureValue * 10));                 //multiple 10 for RAW value
+            setTextSwitchTemperature(NightTemperatureValue);
+        }
+
+    };
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_temp_honeywell, menu);
+        return super.onCreateOptionsMenu(menu);
+
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
+            case R.id.menu_settings:
+                //TODO: show settings
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
 
 }

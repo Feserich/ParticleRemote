@@ -23,26 +23,17 @@
         <activity android:name=".LoginActivity" />
         <activity
             android:name=".TempHumiActivity"
-            android:theme="@style/AppTheme"
-            android:parentActivityName="com.fese.particleremote.MainActivity">
-
-        </activity>
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme"></activity>
         <activity
             android:name=".RelayScrollingActivity"
             android:label="@string/title_activity_relay_scrolling"
-            android:theme="@style/AppTheme"
-            android:parentActivityName="com.fese.particleremote.MainActivity">
-
-        </activity>
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme"></activity>
         <activity
             android:name=".TempHoneywellActivity"
-            android:theme="@style/AppTheme"
-            android:parentActivityName="com.fese.particleremote.MainActivity">
-
-        </activity>
-
-
-
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme"></activity>
         //for particle device setup:
         <activity
             android:name="io.particle.android.sdk.devicesetup.ui.DiscoverDeviceActivity"
@@ -108,8 +99,9 @@
             android:screenOrientation="portrait"
             android:theme="@style/ParticleSetupTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize|stateVisible" />
-
-
+        <activity
+            android:name=".TempHoneywellSettingsActivity"
+            android:label="@string/title_activity_temp_honeywell_settings"></activity>
     </application>
 
 </manifest>
