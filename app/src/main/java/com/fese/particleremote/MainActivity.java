@@ -3,6 +3,7 @@ package com.fese.particleremote;
 import android.content.Intent;
 
 import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -113,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         //call Method on Create
+        PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
         ParticleCloudSDK.init(this);
         ParticleDeviceSetupLibrary.init(this.getApplicationContext(), MainActivity.class);
         checkLoginStatus();
@@ -136,10 +138,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void initializeParticleDeviceFunctions(){
 
-        ParticleFunctions[0] = "Switch Relays";
-        ParticleFunctions[1] = "Read temperature & humidity";
-        ParticleFunctions[2] = "Set Honeywell temperature";
-        ParticleFunctions[3] = "Send commands over 433Mhz radio";
+        ParticleFunctions[0] = getString(R.string.particle_function_dialog_item1);
+        ParticleFunctions[1] = getString(R.string.particle_function_dialog_item2);
+        ParticleFunctions[2] = getString(R.string.particle_function_dialog_item3);
+        ParticleFunctions[3] = getString(R.string.particle_function_dialog_item4);
     }
 
     private void startParticleFunctionDialog(final String deviceID){
@@ -194,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
         Gson gson = new Gson();
         String json = gson.toJson(RVdevices);
         //store this Json string in Shared Preferences
-        prefsEditor.putString("Saved Particle Devices:", json);
+        prefsEditor.putString(getString(R.string.saved_particle_device_shared_pref_key), json);
         prefsEditor.commit();
 
     }
@@ -202,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
     private void loadDeviceList(){
         Gson gson = new Gson();
         //load the Json String. If no string is available the device list is null
-        String json = deviceListSharedPref.getString("Saved Particle Devices:", "");
+        String json = deviceListSharedPref.getString(getString(R.string.saved_particle_device_shared_pref_key), "");
         //transform the Json string into the original device list
         RVdevices = gson.fromJson(json, new TypeToken<List<ParticleDevice>>() {}.getType());
 
@@ -229,7 +231,7 @@ public class MainActivity extends AppCompatActivity {
 
         //delete device List
         SharedPreferences.Editor prefsEditor = deviceListSharedPref.edit();
-        prefsEditor.remove("Saved Particle Devices:");
+        prefsEditor.remove(getString(R.string.saved_particle_device_shared_pref_key));
         prefsEditor.apply();
 
         //Logout the user. Clear session and access token
@@ -313,9 +315,9 @@ public class MainActivity extends AppCompatActivity {
                 return true;
 
             case R.id.menu_settings:
+                Intent intentSettings = new Intent(MainActivity.this, UserSettingsActivity.class);
+                MainActivity.this.startActivity(intentSettings);
                 return true;
-
-
 
             default:
                 return super.onOptionsItemSelected(item);

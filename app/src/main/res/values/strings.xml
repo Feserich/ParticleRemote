@@ -22,82 +22,146 @@
     <string name="settings">Settings</string>
 
 
-    <string-array name="DOPins">
+    <string-array name="DigitalPins">
         <item>D0</item>
         <item>D1</item>
+        <item>D2</item>
+        <item>D3</item>
+        <item>D4</item>
+        <item>D5</item>
+        <item>D6</item>
+        <item>D7</item>
     </string-array>
+
+    <string-array name="AnalogPins">
+        <item>A0</item>
+        <item>A1</item>
+        <item>A2</item>
+        <item>A3</item>
+        <item>A4</item>
+        <item>A5</item>
+    </string-array>
+
+
+    <string name="DHT_default_input">D0</string>
+
+    <string-array name="temperature_selection_titles">
+        <item>13 °C</item>
+        <item>14 °C</item>
+        <item>15 °C</item>
+        <item>16 °C</item>
+        <item>17 °C</item>
+        <item>18 °C</item>
+        <item>19 °C</item>
+        <item>20 °C</item>
+        <item>21 °C</item>
+        <item>22 °C</item>
+        <item>23 °C</item>
+        <item>24 °C</item>
+        <item>25 °C</item>
+        <item>26 °C</item>
+        <item>27 °C</item>
+    </string-array>
+
+    <string-array name="temperature_selection_values">
+        <item>13</item>
+        <item>14</item>
+        <item>15</item>
+        <item>16</item>
+        <item>17</item>
+        <item>18</item>
+        <item>19</item>
+        <item>20</item>
+        <item>21</item>
+        <item>22</item>
+        <item>23</item>
+        <item>24</item>
+        <item>25</item>
+        <item>26</item>
+        <item>27</item>
+    </string-array>
+    <string name="comfort_temperature_default">22</string>
+    <string name="night_temperature_default">18</string>
+    <string name="LOWEST_TEMPERATURE_SELECTION_VALUE">13</string>
+    <string name="HIGHEST_TEMPERATURE_SELECTION_VALUE">27</string>
+    <string name="MIDDLE_TEMPERATURE_SELECTION_VALUE">20 °C</string>
+    <string name="HONEYWELL_OFF_VALUE">75</string>
+
+
+
+
     <string name="title_activity_temp_honeywell_settings">Settings</string>
 
-    <!-- Strings related to Settings -->
 
-    <!-- Example General settings -->
-    <string name="pref_header_general">General</string>
 
-    <string name="pref_title_social_recommendations">Enable social recommendations</string>
-    <string name="pref_description_social_recommendations">Recommendations for people to contact
-        based on your message history
-    </string>
+    <string name="title_activity_user_settings">Settings</string>
+    <string name="pref_comfort_key">pref_comfort_temperature</string>
+    <string name="pref_night_key">pref_night_temperature</string>
+    <string name="setting_temperature_toast_text">Setting temperature...</string>
+    <string name="wrong_response">Wrong response!</string>
+    <string name="read_buffer_overflow">Read Buffer Overflow!</string>
+    <string name="time_out">TimeOut!</string>
+    <string name="off">OFF</string>
+    <string name="on">ON</string>
+    <string name="set_temperature">Set Temperature</string>
+    <string name="comfort">Comfort</string>
+    <string name="night_mode">Night Mode</string>
+    <string name="set_comfort_temp_title">Set comfort temperature</string>
+    <string name="set_comfort_temp_summary">Set the temperature of the comfort button</string>
+    <string name="set_night_temp_title">Set night temperature</string>
+    <string name="set_night_temp_summary">Set the temperature of the night mode button</string>
+    <string name="set_comfort_temp_dialogTitle">Choose a comfort temperature</string>
+    <string name="set_night_temp_dialogTitle">Choose a night temperature</string>
+    <string name="honeywell_temp_pref_category_title">Honeywell Temperature Settings</string>
+    <string name="relay_pref_category_title">Relay Settings</string>
+    <string name="saved_particle_device_shared_pref_key">Saved Particle Devices:</string>
+    <string name="particle_function_dialog_item1">Switch Relays</string>
+    <string name="particle_function_dialog_item2"><![CDATA[Read temperature & humidity]]></string>
+    <string name="particle_function_dialog_item3">Set Honeywell temperature</string>
+    <string name="particle_function_dialog_item4">Send commands over 433Mhz radio</string>
 
-    <string name="pref_title_display_name">Display name</string>
-    <string name="pref_default_display_name">John Smith</string>
+    <string name="wrong_command">Wrong command</string>
+    <string name="relay_out_of_limit">Relay out of limit</string>
+    <string name="wait_a_sec">Wait a sec!</string>
+    <string name="saved_relay_shared_pref_key">Saved Relays for Particle Device:</string>
+    <string name="relay_toggle_confirmation_title">Do you want to toggle this Relay?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="add_relay_popup_title">Add new Relay</string>
+    <string name="yup">Yup</string>
+    <string name="nope">Nope</string>
+    <string name="second_short">sec</string>
+    <string name="minute_short">min</string>
+    <string name="hour_short">h</string>
+    <string name="undo">UNDO</string>
+    <string name="delete_relay_snackbar_text">Relay has been deleted</string>
+    <string name="relay_name">Relay Name</string>
+    <string name="select_output_pin">Select Output Pin:</string>
+    <string name="toggle_back_after">Toggle back after:</string>
+    <string name="zero_number">0</string>
+    <string name="confirmation_before_toggling_relay">Confirmation before toggling relay</string>
+    <string name="temperature_loading">Temperature: loading...</string>
+    <string name="humidity_loading">Humidity: loading...</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="login">Login</string>
+    <string name="temperature">Temperature</string>
+    <string name="humidity">Humidity</string>
+    <string name="pref_toggle_relay_low_output_key">pref_toggle_relay_low_output</string>
+    <string name="temp_humi_pref_category_title">Read Temperature and Humidity Settings</string>
+    <string name="pref_DHT_input_pin_key">pref_DHT_input_pin</string>
+    <string name="pref_refresh_cycle_chart_key">pref_refresh_cycle_chart</string>
+    <string name="refresh_cycle_chart_default_value">5</string>
+    <string name="set_dht22_input_pin_title">Set input pin for DHT22</string>
+    <string name="set_dht22_input_pin_summary">Must be changed also in Particle Code! Default: D0</string>
+    <string name="set_dht22_input_pin_dialogTitle">Set input pin</string>
+    <string name="set_chart_refresh_cycle_title">Set chart refresh cycle</string>
+    <string name="set_chart_refresh_cycle_summary">Set the seconds till a new point will be added to the chart</string>
+    <string name="set_chart_refresh_cycle_dialogTitle">Set chart refresh cycle [s]</string>
+    <string name="toggle_relay_low_output_summaryOff">Relay is switched when output level is 3 Volt</string>
+    <string name="toggle_relay_low_output_summaryOn">Relay is switched when output level is GND</string>
+    <string name="toggle_relay_low_output_title">Switched on LOW Output</string>
+    <string name="pin_used_by_DHT22_error_message">Pin is used by temperature sensor (DHT22)</string>
 
-    <string name="pref_title_add_friends_to_messages">Add friends to messages</string>
-    <string-array name="pref_example_list_titles">
-        <item>Always</item>
-        <item>When possible</item>
-        <item>Never</item>
-    </string-array>
-    <string-array name="pref_example_list_values">
-        <item>1</item>
-        <item>0</item>
-        <item>-1</item>
-    </string-array>
-
-    <!-- Example settings for Data & Sync -->
-    <string name="pref_header_data_sync">Data &amp; sync</string>
-
-    <string name="pref_title_sync_frequency">Sync frequency</string>
-    <string-array name="pref_sync_frequency_titles">
-        <item>15 minutes</item>
-        <item>30 minutes</item>
-        <item>1 hour</item>
-        <item>3 hours</item>
-        <item>6 hours</item>
-        <item>Never</item>
-    </string-array>
-    <string-array name="pref_sync_frequency_values">
-        <item>15</item>
-        <item>30</item>
-        <item>60</item>
-        <item>180</item>
-        <item>360</item>
-        <item>-1</item>
-    </string-array>
-
-    <string-array name="list_preference_entries">
-        <item>Entry 1</item>
-        <item>Entry 2</item>
-        <item>Entry 3</item>
-    </string-array>
-
-    <string-array name="list_preference_entry_values">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-    </string-array>
-
-    <string-array name="multi_select_list_preference_default_value" />
-
-    <string name="pref_title_system_sync_settings">System sync settings</string>
-
-    <!-- Example settings for Notifications -->
-    <string name="pref_header_notifications">Notifications</string>
-
-    <string name="pref_title_new_message_notifications">New message notifications</string>
-
-    <string name="pref_title_ringtone">Ringtone</string>
-    <string name="pref_ringtone_silent">Silent</string>
-
-    <string name="pref_title_vibrate">Vibrate</string>
 
 </resources>

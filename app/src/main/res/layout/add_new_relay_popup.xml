@@ -17,7 +17,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/input_relay_name"
             android:inputType="textCapSentences"
-            android:hint="Relay Name"
+            android:hint="@string/relay_name"
             android:imeOptions="actionNext"/>
     </android.support.design.widget.TextInputLayout>
 
@@ -34,11 +34,10 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Select Output Pin:"
+            android:text="@string/select_output_pin"
             android:id="@+id/selectPinTV" />
 
         <Spinner
-            android:layout_toRightOf="@+id/selectPinTV"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/relayPinSpinner" />
@@ -60,7 +59,7 @@
             android:textSize="16sp"
             android:layout_gravity="center_vertical"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Toggle back after:"
+            android:text="@string/toggle_back_after"
             android:id="@+id/relayTimerCheckBox" />
 
 
@@ -69,7 +68,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/inputTimerNumber"
             android:inputType="number"
-            android:hint="0"
+            android:hint="@string/zero_number"
             android:maxLength="3"
             android:enabled="false"
             android:imeOptions="actionNext"/>
@@ -92,7 +91,7 @@
         android:textSize="16sp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
-        android:text="Confirmation before toggling relay"
+        android:text="@string/confirmation_before_toggling_relay"
         android:id="@+id/ConfirmationCheckBox"
         android:layout_below="@+id/linLayoutSetTimer"
         android:checked="false" />

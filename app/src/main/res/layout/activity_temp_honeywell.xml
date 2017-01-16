@@ -38,7 +38,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_gravity="start"
-            android:text="OFF"/>
+            android:text="@string/off"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -46,13 +46,13 @@
             android:gravity="center_horizontal"
             android:layout_centerInParent="true"
 
-            android:text="20 °C"/>
+            android:text="@string/MIDDLE_TEMPERATURE_SELECTION_VALUE"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:text="ON"/>
+            android:text="@string/on"/>
 
 
 
@@ -80,7 +80,7 @@
         android:layout_centerHorizontal="true"
         android:layout_below="@id/discrete_seekbar_target_temp"
         android:id="@+id/btn_setTargetTemp"
-        android:text="Set Temperature"
+        android:text="@string/set_temperature"
         />
 
     <ProgressBar
@@ -110,7 +110,7 @@
             android:layout_height="match_parent"
             android:id="@+id/btn_tempOff"
             android:layout_weight="1"
-            android:text="OFF"/>
+            android:text="@string/off"/>
 
         <Button
             android:layout_width="wrap_content"
@@ -118,7 +118,7 @@
             android:id="@+id/btn_tempComfort"
             android:layout_weight="1"
             android:layout_marginStart="16dp"
-            android:text="Comfort"/>
+            android:text="@string/comfort"/>
 
         <Button
             android:layout_width="wrap_content"
@@ -126,7 +126,7 @@
             android:id="@+id/btn_tempNight"
             android:layout_weight="1"
             android:layout_marginStart="16dp"
-            android:text="Night Mode"/>
+            android:text="@string/night_mode"/>
 
 
 

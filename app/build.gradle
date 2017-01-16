@@ -44,5 +44,6 @@ dependencies {
     compile 'org.adw.library:discrete-seekbar:1.0.1'
     compile 'net.steamcrafted:load-toast:1.0.10'
     compile 'com.github.PhilJay:MPAndroidChart:v3.0.1'
+    compile 'com.android.support.constraint:constraint-layout:+'
     testCompile 'junit:junit:4.12'
 }

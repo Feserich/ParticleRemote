@@ -1,8 +1,10 @@
 package com.fese.particleremote;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -16,6 +18,8 @@ import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -30,6 +34,8 @@ import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import io.particle.android.sdk.cloud.*;
@@ -58,6 +64,7 @@ public class RelayScrollingActivity extends AppCompatActivity {
     private String commandValue;
     private Integer toggleTime;
     private static final String TAG = "RelayScrollingActivity";
+    private Boolean switchedOnLowOutput = true;
 
 
 
@@ -90,8 +97,15 @@ public class RelayScrollingActivity extends AppCompatActivity {
                 public Integer callApi(ParticleDevice particleDevice) throws ParticleCloudException, IOException {
                     Integer success = 0;
 
-                    //set the commandValue to the opposite of isSwitched
-                    commandValue = (relay.isSwitched) ? "LOW " : "HIGH";
+                    if (switchedOnLowOutput){
+                        //relay is switched on low output
+                        commandValue = (relay.isSwitched) ? "HIGH " : "LOW";
+                    }
+                    else {
+                        //relay is switched on high output
+                        commandValue = (relay.isSwitched) ? "LOW " : "HIGH";
+                    }
+
                     //the commands in functionCommandList will be executed by the Particle device
                     functionCommandList = new ArrayList<String>();
                     functionCommandList.add(relay.pin);
@@ -115,8 +129,10 @@ public class RelayScrollingActivity extends AppCompatActivity {
 
                 public void onSuccess(Integer returnValue) {
                     if (returnValue == 1) {
+
+                        //only change isSwitched if there is no toggle time
                         if (relay.toggleTime == 0){
-                            relay.isSwitched = (commandValue.equals("HIGH"));       //only change isSwitched if there is no toggle time
+                            relay.isSwitched = (switchedOnLowOutput) ? (commandValue.equals("LOW")) :(commandValue.equals("HIGH"));
                         }
                         relay.tryToSwitch = false;
 
@@ -124,13 +140,19 @@ public class RelayScrollingActivity extends AppCompatActivity {
                     else if (returnValue == -1){
                         relay.tryToSwitch = false;
                         Snackbar snackbarError = Snackbar
-                                .make(recyclerView, "Relay out of limit", Snackbar.LENGTH_LONG);
+                                .make(recyclerView, R.string.relay_out_of_limit, Snackbar.LENGTH_LONG);
                         snackbarError.show();
                     }
                     else if (returnValue == -2){
                         relay.tryToSwitch = false;
                         Snackbar snackbarError = Snackbar
-                                .make(recyclerView, "Wrong command", Snackbar.LENGTH_LONG);
+                                .make(recyclerView, R.string.wrong_command, Snackbar.LENGTH_LONG);
+                        snackbarError.show();
+                    }
+                    else if (returnValue == -3){
+                        relay.tryToSwitch = false;
+                        Snackbar snackbarError = Snackbar
+                                .make(recyclerView, R.string.pin_used_by_DHT22_error_message, Snackbar.LENGTH_LONG);
                         snackbarError.show();
                     }
                     else {
@@ -157,7 +179,7 @@ public class RelayScrollingActivity extends AppCompatActivity {
         }
         else {
             Snackbar snackbarWait = Snackbar
-                    .make(recyclerView, "Wait a sec!", Snackbar.LENGTH_LONG);
+                    .make(recyclerView, R.string.wait_a_sec, Snackbar.LENGTH_LONG);
             snackbarWait.show();
         }
 
@@ -197,7 +219,7 @@ public class RelayScrollingActivity extends AppCompatActivity {
         Gson gson = new Gson();
         String json = gson.toJson(listRelays);
         //store this Json string in Shared Preferences
-        prefsEditor.putString("Saved Relays for Particle Device:" + myParticleID, json);
+        prefsEditor.putString(getString(R.string.saved_relay_shared_pref_key) + myParticleID, json);
         prefsEditor.commit();
 
     }
@@ -205,7 +227,7 @@ public class RelayScrollingActivity extends AppCompatActivity {
     private void loadStoredRelays (){
         Gson gson = new Gson();
         //load the Json String. If no string is available the relay list is null
-        String json = relaySharedPref.getString("Saved Relays for Particle Device:" + myParticleID, "");
+        String json = relaySharedPref.getString(getString(R.string.saved_relay_shared_pref_key) + myParticleID, "");
         //transform the Json string into the original relay list
         listRelays = gson.fromJson(json, new TypeToken<List<Relay>>() {}.getType());
 
@@ -217,9 +239,9 @@ public class RelayScrollingActivity extends AppCompatActivity {
 
     private void showConfirmationPopup(final Relay relay){
         new MaterialDialog.Builder(this)
-                .title("Do you want to toggle this Relay?")
-                .positiveText("Yes")
-                .negativeText("No")
+                .title(R.string.relay_toggle_confirmation_title)
+                .positiveText(R.string.yes)
+                .negativeText(R.string.no)
                 .onPositive(new MaterialDialog.SingleButtonCallback() {
 
                     @Override
@@ -237,38 +259,44 @@ public class RelayScrollingActivity extends AppCompatActivity {
         boolean wrapInScrollView = true;
         final ArrayList<String> Arr_TimeUnitSpinner = new ArrayList<String>();
         Arr_TimeUnitSpinner.clear();
-        Arr_TimeUnitSpinner.add("sec");
-        Arr_TimeUnitSpinner.add("min");
-        Arr_TimeUnitSpinner.add("h");
+        Arr_TimeUnitSpinner.add(getString(R.string.second_short));
+        Arr_TimeUnitSpinner.add(getString(R.string.minute_short));
+        Arr_TimeUnitSpinner.add(getString(R.string.hour_short));
 
-        //TODO: Option in settings to use the D2 pin
-        final ArrayList<String> Arr_DOPinsSpinner = new ArrayList<String>();
-        Arr_DOPinsSpinner.clear();
-        Arr_DOPinsSpinner.add("D0");
-        Arr_DOPinsSpinner.add("D1");
-        //Arr_DOPinsSpinner.add("D2");              //D2 Pin is used by the DHT22
-        Arr_DOPinsSpinner.add("D3");
-        Arr_DOPinsSpinner.add("D4");
-        Arr_DOPinsSpinner.add("D5");
-        Arr_DOPinsSpinner.add("D6");
-        Arr_DOPinsSpinner.add("D7");
+
+
+
+
+        List<String> Arr_PinsSpinner = new LinkedList<String>(Arrays.asList(getResources().getStringArray(R.array.DigitalPins)));
+        List<String> Arr_AOPinsSpinner = new LinkedList<String>(Arrays.asList(getResources().getStringArray(R.array.AnalogPins)));
+
+        for (String analogPin : Arr_AOPinsSpinner) {
+            Arr_PinsSpinner.add(analogPin);
+        }
+
+
+        //remove the pin which is used by the DHT22 sensor
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        String pinDHT22 = sharedPref.getString(getString(R.string.pref_DHT_input_pin_key), "");
+        Arr_PinsSpinner.remove(pinDHT22);
+
+
 
 
         if (listRelays!=null){                      //show only DO Pins which aren't used from other Relays
             for (Relay relay: listRelays)
             {
-                Arr_DOPinsSpinner.remove(relay.pin.toString());
+                Arr_PinsSpinner.remove(relay.pin.toString());
             }
         }
 
 
-        //TODO: CheckBox: Relay is Switched on LOW Output (negate relay.isSwitched)
         //Show Popup Dialog
         MaterialDialog dialog = new MaterialDialog.Builder(RelayScrollingActivity.this)
-                .title("Add new Relay")
+                .title(R.string.add_relay_popup_title)
                 .customView(R.layout.add_new_relay_popup, wrapInScrollView)
-                .positiveText("Yup")
-                .negativeText("Nope")
+                .positiveText(R.string.yup)
+                .negativeText(R.string.nope)
                 .onPositive(new MaterialDialog.SingleButtonCallback() {
                     @Override
                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
@@ -285,16 +313,14 @@ public class RelayScrollingActivity extends AppCompatActivity {
                         {
 
                             toggleTime = Integer.parseInt(et_toggleTime.getText().toString());
-                            switch (SpinnerTimeUnit.getSelectedItem().toString()) {
-                                case "s":
-                                    break;
-                                case "min":
-                                    toggleTime = toggleTime * 60;
-                                    break;
-                                case "h":
-                                    toggleTime = toggleTime * 60 * 60;
-                                    break;
+
+                            if (SpinnerTimeUnit.getSelectedItem().toString().equals(getString(R.string.minute_short))){
+                                toggleTime = toggleTime * 60;
                             }
+                            else if (SpinnerTimeUnit.getSelectedItem().toString().equals(getString(R.string.hour_short))){
+                                toggleTime = toggleTime * 60 * 60;
+                            }
+
                         }
                         else{
                             toggleTime = 0;
@@ -313,7 +339,7 @@ public class RelayScrollingActivity extends AppCompatActivity {
 
         //set the items from the Array above into the Spinner
         pinSpinner = (Spinner) dialog.getCustomView().findViewById(R.id.relayPinSpinner);
-        ArrayAdapter<String> PinSpinnerAdapter = new ArrayAdapter<String>(RelayScrollingActivity.this, android.R.layout.simple_spinner_item, Arr_DOPinsSpinner);
+        ArrayAdapter<String> PinSpinnerAdapter = new ArrayAdapter<String>(RelayScrollingActivity.this, android.R.layout.simple_spinner_item, Arr_PinsSpinner);
         PinSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         pinSpinner.setAdapter(PinSpinnerAdapter);
 
@@ -408,8 +434,8 @@ public class RelayScrollingActivity extends AppCompatActivity {
                         final int position = viewHolder.getAdapterPosition();
 
                         Snackbar snackbarDelete = Snackbar
-                                .make(recyclerView, "Relay has been deleted", Snackbar.LENGTH_LONG)
-                                .setAction("UNDO", new View.OnClickListener(){
+                                .make(recyclerView, R.string.delete_relay_snackbar_text, Snackbar.LENGTH_LONG)
+                                .setAction(R.string.undo, new View.OnClickListener(){
 
                                     @Override
                                     public void onClick(View v) {
@@ -443,6 +469,15 @@ public class RelayScrollingActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_relay_scrolling, menu);
+        return super.onCreateOptionsMenu(menu);
+
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -453,10 +488,26 @@ public class RelayScrollingActivity extends AppCompatActivity {
                 NavUtils.navigateUpFromSameTask(this);
                 return true;
 
+            case R.id.menu_settings:
+                Intent intentSettings = new Intent(RelayScrollingActivity.this, UserSettingsActivity.class);
+                RelayScrollingActivity.this.startActivity(intentSettings);
+                return true;
+
             default:
                 return super.onOptionsItemSelected(item);
         }
 
 
     }
+
+    @Override
+    protected void onResume()
+    {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        switchedOnLowOutput = sharedPref.getBoolean(getString(R.string.pref_toggle_relay_low_output_key), true);
+        super.onResume();
+    }
+
+
+
 }

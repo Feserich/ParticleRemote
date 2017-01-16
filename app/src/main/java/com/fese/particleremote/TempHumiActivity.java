@@ -1,11 +1,16 @@
 package com.fese.particleremote;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -45,7 +50,7 @@ public class TempHumiActivity extends AppCompatActivity {
     private View viewTempHumi;
 
 
-    private static final int REFRESH_CYCLE = 5000;          //unit: [ms]
+    private int refresh_cycle;                                          //unit: [ms]
     private static final float MIN_TEMPERATURE_DEFAULT_VALUE = 10;
     private static final float MAX_TEMPERATURE_DEFAULT_VALUE = 30;
     private static final float MIN_HUMIDITY_DEFAULT_VALUE = 0;
@@ -60,6 +65,7 @@ public class TempHumiActivity extends AppCompatActivity {
         temperatureTV = (TextView)findViewById(R.id.tv_temperature);
         humidityTV = (TextView)findViewById(R.id.tv_humidity);
         viewTempHumi = (RelativeLayout) findViewById(R.id.RelLay_tempHumi);
+
 
         //Init Line Chart
         tempHumiChart = (LineChart) findViewById(R.id.tempHumiChart);
@@ -144,15 +150,15 @@ public class TempHumiActivity extends AppCompatActivity {
 
     }
 
-    public void setValuesToEditText(){
+    private void setValuesToEditText(){
         temperatureVal = (double)Math.round(temperatureVal * 100)/ 100d;
         humidityVal = (double)Math.round(humidityVal * 100)/ 100d;
 
-        temperatureTV.setText("Temperature: " + String.valueOf(temperatureVal) + "°C");
-        humidityTV.setText("Humidity: " + String.valueOf(humidityVal) + "%");
+        temperatureTV.setText(getString(R.string.temperature)+ ": " + String.valueOf(temperatureVal) + " °C");
+        humidityTV.setText(getString(R.string.humidity) + ": " + String.valueOf(humidityVal) + " %");
     }
 
-    public void addTempHumiValueToChart(double temperatureValueX, double humidityValueX){
+    private void addTempHumiValueToChart(double temperatureValueX, double humidityValueX){
 
         LineData data = tempHumiChart.getData();
 
@@ -181,8 +187,8 @@ public class TempHumiActivity extends AppCompatActivity {
                 yAxisLeft.resetAxisMaximum();
             }
 
-            data.addEntry(new Entry(tempSet.getEntryCount() * (REFRESH_CYCLE/1000), (float) temperatureValueX), 0);
-            data.addEntry(new Entry(humiSet.getEntryCount() * (REFRESH_CYCLE/1000), (float) humidityValueX), 1);
+            data.addEntry(new Entry(tempSet.getEntryCount() * (refresh_cycle/1000), (float) temperatureValueX), 0);
+            data.addEntry(new Entry(humiSet.getEntryCount() * (refresh_cycle/1000), (float) humidityValueX), 1);
             data.notifyDataChanged();
 
             // let the chart know it's data has changed
@@ -203,8 +209,17 @@ public class TempHumiActivity extends AppCompatActivity {
 
     }
 
+    private void getRefreshCycleFromSettings(){
+        Log.i("SOME_TAG", "getRefreshCycleFromSettings");
+        SharedPreferences SharedPref  = PreferenceManager.getDefaultSharedPreferences(this);
+
+        String refreshCycleString = SharedPref.getString(getString(R.string.pref_refresh_cycle_chart_key), getString(R.string.refresh_cycle_chart_default_value));
+        refresh_cycle = Integer.valueOf(refreshCycleString) * 1000;
+
+    }
+
     private LineDataSet createTemperatureSet(){
-        LineDataSet set = new LineDataSet(null, "Temperature [°C]");
+        LineDataSet set = new LineDataSet(null, getString(R.string.temperature) + " [°C]");
         set.setAxisDependency(YAxis.AxisDependency.LEFT);
         set.setColor(ColorTemplate.MATERIAL_COLORS[1]);
         //set.setCircleColor(Color.WHITE);
@@ -222,7 +237,7 @@ public class TempHumiActivity extends AppCompatActivity {
     }
 
     private LineDataSet createHumiditySet(){
-        LineDataSet set = new LineDataSet(null, "Humidity [%]");
+        LineDataSet set = new LineDataSet(null, getString(R.string.humidity) + " [%]");
         set.setAxisDependency(YAxis.AxisDependency.RIGHT);
         set.setColor(ColorTemplate.MATERIAL_COLORS[3]);
         //set.setCircleColor(Color.WHITE);
@@ -266,12 +281,14 @@ public class TempHumiActivity extends AppCompatActivity {
 
     }
 
+
+    //TODO: start a service in the background for recording the data + a notification message (battery drain!)
     private Runnable getNewValuesRunnable = new Runnable() {
         @Override
         public void run() {
 
             getTemperatureAndHumidity();
-            handler.postDelayed(getNewValuesRunnable, REFRESH_CYCLE);
+            handler.postDelayed(getNewValuesRunnable, refresh_cycle);
 
         }
     };
@@ -285,29 +302,41 @@ public class TempHumiActivity extends AppCompatActivity {
     @Override
     protected void onResume()
     {
-
+        getRefreshCycleFromSettings();
         handler.post(getNewValuesRunnable);
         super.onResume();
     }
 
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_temp_humi_activity, menu);
+        return super.onCreateOptionsMenu(menu);
 
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.home:
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
                 NavUtils.navigateUpFromSameTask(this);
+                return true;
+            case R.id.menu_settings:
+                Intent intentSettings = new Intent(TempHumiActivity.this, UserSettingsActivity.class);
+                TempHumiActivity.this.startActivity(intentSettings);
                 return true;
 
             default:
                 return super.onOptionsItemSelected(item);
         }
 
-
     }
+
+
 }
 
 class MyYAxisTemperatureFormatter implements IAxisValueFormatter {

@@ -1,33 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="@string/honeywell_temp_pref_category_title"
+        android:key="pref_key_temp_honeywell">
 
-    <SwitchPreference
-        android:defaultValue="true"
-        android:key="example_switch"
-        android:summary="@string/pref_description_social_recommendations"
-        android:title="@string/pref_title_social_recommendations" />
 
-    <!-- NOTE: EditTextPreference accepts EditText attributes. -->
-    <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
-    <EditTextPreference
-        android:capitalize="words"
-        android:defaultValue="@string/pref_default_display_name"
-        android:inputType="textCapWords"
-        android:key="example_text"
-        android:maxLines="1"
-        android:selectAllOnFocus="true"
-        android:singleLine="true"
-        android:title="@string/pref_title_display_name" />
+        <ListPreference
+            android:key="@string/pref_comfort_key"
+            android:title="@string/set_comfort_temp_title"
+            android:summary="@string/set_comfort_temp_summary"
+            android:dialogTitle="@string/set_comfort_temp_dialogTitle"
+            android:entries="@array/temperature_selection_titles"
+            android:entryValues="@array/temperature_selection_values"
+            android:defaultValue="@string/comfort_temperature_default" />
 
-    <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to
-         dismiss it. -->
-    <!-- NOTE: ListPreference's summary should be set to its value by the activity code. -->
-    <ListPreference
-        android:defaultValue="-1"
-        android:entries="@array/pref_example_list_titles"
-        android:entryValues="@array/pref_example_list_values"
-        android:key="example_list"
-        android:negativeButtonText="@null"
-        android:positiveButtonText="@null"
-        android:title="@string/pref_title_add_friends_to_messages" />
+        <ListPreference
+            android:key="@string/pref_night_key"
+            android:title="@string/set_night_temp_title"
+            android:summary="@string/set_night_temp_summary"
+            android:dialogTitle="@string/set_night_temp_dialogTitle"
+            android:entries="@array/temperature_selection_titles"
+            android:entryValues="@array/temperature_selection_values"
+            android:defaultValue="@string/night_temperature_default"
+            android:dependency="pref_comfort_temperature"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/temp_humi_pref_category_title">
+
+        <ListPreference
+            android:key="@string/pref_DHT_input_pin_key"
+            android:title="@string/set_dht22_input_pin_title"
+            android:summary="@string/set_dht22_input_pin_summary"
+            android:dialogTitle="@string/set_dht22_input_pin_dialogTitle"
+            android:entries="@array/DigitalPins"
+            android:entryValues="@array/DigitalPins"
+            android:defaultValue="@string/DHT_default_input" />
+
+        <EditTextPreference
+            android:key="@string/pref_refresh_cycle_chart_key"
+            android:title="@string/set_chart_refresh_cycle_title"
+            android:summary="@string/set_chart_refresh_cycle_summary"
+            android:dialogTitle="@string/set_chart_refresh_cycle_dialogTitle"
+            android:defaultValue="@string/refresh_cycle_chart_default_value"
+            android:inputType="number"
+            android:maxLength="4"
+            android:dependency="@string/pref_DHT_input_pin_key"/>
+
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="@string/relay_pref_category_title">
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="@string/pref_toggle_relay_low_output_key"
+            android:summaryOff="@string/toggle_relay_low_output_summaryOff"
+            android:summaryOn="@string/toggle_relay_low_output_summaryOn"
+            android:title="@string/toggle_relay_low_output_title" />
+
+    </PreferenceCategory>
+
 
 </PreferenceScreen>

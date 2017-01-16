@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.fese.particleremote.UserSettingsActivity">
+
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+                <include
+                    layout="@layout/app_bar" />
+
+
+                <FrameLayout
+                    android:id="@+id/content_settings_frame"
+                    android:layout_below="@+id/app_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+        </RelativeLayout>
+
+
+
+</android.support.design.widget.CoordinatorLayout>

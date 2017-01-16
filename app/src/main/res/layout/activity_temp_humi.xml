@@ -20,7 +20,7 @@
         android:layout_below="@id/app_bar"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:text="Temperature: loading..."
+        android:text="@string/temperature_loading"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <TextView
@@ -31,7 +31,7 @@
         android:layout_below="@+id/tv_temperature"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:text="Humidity: loading..."
+        android:text="@string/humidity_loading"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
 
