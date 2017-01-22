@@ -63,7 +63,8 @@ public class RelayScrollingActivity extends AppCompatActivity {
     private Integer toggleTime;
     private static final String TAG = "RelayScrollingActivity";
     private Boolean switchedOnLowOutput = true;
-
+    private static final String lowCommand = "LOW ";                //add a Space to the "LOW" command, so that particle device can interpret toggleTime(same count of character as "HIGH")
+    private static final String highCommand = "HIGH";
 
 
     @Override
@@ -97,11 +98,11 @@ public class RelayScrollingActivity extends AppCompatActivity {
 
                     if (switchedOnLowOutput){
                         //relay is switched on low output
-                        commandValue = (relay.isSwitched) ? "HIGH" : "LOW ";           //add a Space to the "LOW" command, so that particle device can interpret toggleTime(same count of character as "HIGH")
+                        commandValue = (relay.isSwitched) ? highCommand : lowCommand;
                     }
                     else {
                         //relay is switched on high output
-                        commandValue = (relay.isSwitched) ? "LOW " : "HIGH";            //add a Space to the "LOW" command, so that particle device can interpret toggleTime(same count of character as "HIGH")
+                        commandValue = (relay.isSwitched) ? lowCommand : highCommand;
                     }
 
                     //the commands in functionCommandList will be executed by the Particle device
@@ -130,7 +131,7 @@ public class RelayScrollingActivity extends AppCompatActivity {
 
                         //only change isSwitched if there is no toggle time
                         if (relay.toggleTime == 0){
-                            relay.isSwitched = (switchedOnLowOutput) ? (commandValue.equals("LOW")) :(commandValue.equals("HIGH"));
+                            relay.isSwitched = (switchedOnLowOutput) ? (commandValue.equals(lowCommand)) :(commandValue.equals(highCommand));
                         }
                         relay.tryToSwitch = false;
 
