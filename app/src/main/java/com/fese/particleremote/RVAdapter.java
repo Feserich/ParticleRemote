@@ -37,32 +37,6 @@ class MyParticleDevice {
         this.isConnected = isConnected;
     }
 
-    public static ParticleDevice getParticleDeviceInstance(final String particleDeviceID){
-        final ParticleDevice[] myDevice = new ParticleDevice[1];
-
-
-        Async.executeAsync(ParticleCloudSDK.getCloud(), new Async.ApiWork<ParticleCloud, ParticleDevice>() {
-
-            public ParticleDevice callApi(ParticleCloud particleCloud) throws ParticleCloudException, IOException {
-                ParticleDevice device = ParticleCloudSDK.getCloud().getDevice(particleDeviceID);
-                return device;
-            }
-
-            public void onSuccess(ParticleDevice device) {
-                myDevice[0] = device;
-
-            }
-
-            public void onFailure(ParticleCloudException e) {
-                Log.e("SOME_TAG", e.getBestMessage());
-
-            }
-
-        });
-
-
-        return myDevice[0];
-    }
 }
 
 public class RVAdapter extends RecyclerView.Adapter<RVAdapter.DeviceViewHolder> {

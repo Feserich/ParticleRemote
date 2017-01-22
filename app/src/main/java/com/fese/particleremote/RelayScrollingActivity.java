@@ -190,8 +190,6 @@ public class RelayScrollingActivity extends AppCompatActivity {
         //get the ID of the selected Particle Device from the MainActivity
         myParticleID = (String) getIntent().getSerializableExtra("deviceID");
 
-        //myParticleDevice = MyParticleDevice.getParticleDeviceInstance(myParticleID);
-
 
         Async.executeAsync(ParticleCloudSDK.getCloud(), new Async.ApiWork<ParticleCloud, Void>() {
 
