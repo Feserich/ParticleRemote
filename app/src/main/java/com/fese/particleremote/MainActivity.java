@@ -4,6 +4,7 @@ import android.content.Intent;
 
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -32,13 +33,15 @@ import io.particle.android.sdk.cloud.ParticleCloudSDK;
 import io.particle.android.sdk.devicesetup.ParticleDeviceSetupLibrary;
 import io.particle.android.sdk.utils.Async;
 
+import static com.fese.particleremote.R.color.colorAccent;
+
 
 public class MainActivity extends AppCompatActivity {
 
     private RecyclerView rv;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private String[] ParticleFunctions = new String[4];
-    private List<ParticleDevice> RVdevices;
+    private List<MyParticleDevice> RVdevices;
     private List<io.particle.android.sdk.cloud.ParticleDevice> availableDevices;
     private SharedPreferences deviceListSharedPref;
 
@@ -50,7 +53,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.activity_main_swipe_refresh_layout);
-        mSwipeRefreshLayout.setColorSchemeResources(R.color.colorAccent, R.color.blue, R.color.green);
+        if (mSwipeRefreshLayout != null) {
+            mSwipeRefreshLayout.setColorSchemeResources(R.color.colorAccent, R.color.blue, R.color.green);
+        }
         rv = (RecyclerView) findViewById(R.id.deviceList);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         rv.setLayoutManager(linearLayoutManager);
@@ -71,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onParticleDeviceClicked(String deviceID) {
                 if (RVdevices != null) {
-                    for (ParticleDevice device : RVdevices) {
+                    for (MyParticleDevice device : RVdevices) {
                         if (deviceID.equals("test device")) {
                             Snackbar snackbarInfo = Snackbar
                                     .make(rv, "Selected device is a virtual test device!", Snackbar.LENGTH_LONG);
@@ -105,12 +110,14 @@ public class MainActivity extends AppCompatActivity {
 
         //Setup a new Particle Device
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_setupDevice);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ParticleDeviceSetupLibrary.startDeviceSetup(MainActivity.this);
-            }
-        });
+        if (fab != null) {
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ParticleDeviceSetupLibrary.startDeviceSetup(MainActivity.this);
+                }
+            });
+        }
 
 
         //call Method on Create
@@ -126,12 +133,12 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void initializeTestDeviceList() {
-        RVdevices.add(new ParticleDevice("*Electron Test Device", "test device", "ELECTRON", false));
-        RVdevices.add(new ParticleDevice("*Core Test Device", "test device", "CORE", true));
-        RVdevices.add(new ParticleDevice("*Electron Test Device", "test device", "ELECTRON", false));
-        RVdevices.add(new ParticleDevice("*Electron Test Device", "test device", "ELECTRON", false));
-        RVdevices.add(new ParticleDevice("*Electron Test Device", "test device", "ELECTRON", false));
-        RVdevices.add(new ParticleDevice("*Electron Test Device", "test device", "ELECTRON", false));
+        RVdevices.add(new MyParticleDevice("*Electron Test Device", "test device", "ELECTRON", false));
+        RVdevices.add(new MyParticleDevice("*Core Test Device", "test device", "CORE", true));
+        RVdevices.add(new MyParticleDevice("*Electron Test Device", "test device", "ELECTRON", false));
+        RVdevices.add(new MyParticleDevice("*Electron Test Device", "test device", "ELECTRON", false));
+        RVdevices.add(new MyParticleDevice("*Electron Test Device", "test device", "ELECTRON", false));
+        RVdevices.add(new MyParticleDevice("*Electron Test Device", "test device", "ELECTRON", false));
 
 
     }
@@ -197,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
         String json = gson.toJson(RVdevices);
         //store this Json string in Shared Preferences
         prefsEditor.putString(getString(R.string.saved_particle_device_shared_pref_key), json);
-        prefsEditor.commit();
+        prefsEditor.apply();
 
     }
 
@@ -206,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
         //load the Json String. If no string is available the device list is null
         String json = deviceListSharedPref.getString(getString(R.string.saved_particle_device_shared_pref_key), "");
         //transform the Json string into the original device list
-        RVdevices = gson.fromJson(json, new TypeToken<List<ParticleDevice>>() {}.getType());
+        RVdevices = gson.fromJson(json, new TypeToken<List<MyParticleDevice>>() {}.getType());
 
         //if no String is available RVdevices is set to null!
         if (RVdevices == null){
@@ -250,11 +257,11 @@ public class MainActivity extends AppCompatActivity {
                 return ParticleCloudSDK.getCloud().getDevices();
             }
 
-            public void onSuccess(List<io.particle.android.sdk.cloud.ParticleDevice> devices) {
+            public void onSuccess( List<io.particle.android.sdk.cloud.ParticleDevice> devices) {
                 availableDevices = devices;
                 RVdevices.clear();
                 for (io.particle.android.sdk.cloud.ParticleDevice device : availableDevices) {
-                    RVdevices.add(new ParticleDevice(device.getName(), device.getID(), device.getDeviceType().toString(), device.isConnected()));
+                    RVdevices.add(new MyParticleDevice(device.getName(), device.getID(), device.getDeviceType().toString(), device.isConnected()));
                 }
                 initializeTestDeviceList();
                 rv.getAdapter().notifyDataSetChanged();

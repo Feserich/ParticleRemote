@@ -88,10 +88,7 @@
     <string name="HONEYWELL_OFF_VALUE">75</string>
 
 
-
-
     <string name="title_activity_temp_honeywell_settings">Settings</string>
-
 
 
     <string name="title_activity_user_settings">Settings</string>
@@ -162,6 +159,9 @@
     <string name="toggle_relay_low_output_summaryOn">Relay is switched when output level is GND</string>
     <string name="toggle_relay_low_output_title">Switched on LOW Output</string>
     <string name="pin_used_by_DHT22_error_message">Pin is used by temperature sensor (DHT22)</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="configure">Configure</string>
+    <string name="add_widget">Add widget</string>
 
 
 </resources>

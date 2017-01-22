@@ -1,7 +1,9 @@
 package com.fese.particleremote;
 
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,23 +11,57 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 
+import java.io.IOException;
 import java.util.List;
+
+import io.particle.android.sdk.cloud.ParticleCloud;
+import io.particle.android.sdk.cloud.ParticleCloudException;
+import io.particle.android.sdk.cloud.ParticleCloudSDK;
+import io.particle.android.sdk.cloud.ParticleDevice;
+import io.particle.android.sdk.utils.Async;
 
 /**
  * Created by Fabia on 21.01.2016.
  */
 
-class ParticleDevice {
+class MyParticleDevice {
     String deviceName;
     String deviceID;
     String model;
     boolean isConnected;
 
-    ParticleDevice(String deviceName, String deviceID, String model, boolean isConnected) {
+    MyParticleDevice(String deviceName, String deviceID, String model, boolean isConnected) {
         this.deviceName = deviceName;
         this.deviceID = deviceID;
         this.model = model;
         this.isConnected = isConnected;
+    }
+
+    public static ParticleDevice getParticleDeviceInstance(final String particleDeviceID){
+        final ParticleDevice[] myDevice = new ParticleDevice[1];
+
+
+        Async.executeAsync(ParticleCloudSDK.getCloud(), new Async.ApiWork<ParticleCloud, ParticleDevice>() {
+
+            public ParticleDevice callApi(ParticleCloud particleCloud) throws ParticleCloudException, IOException {
+                ParticleDevice device = ParticleCloudSDK.getCloud().getDevice(particleDeviceID);
+                return device;
+            }
+
+            public void onSuccess(ParticleDevice device) {
+                myDevice[0] = device;
+
+            }
+
+            public void onFailure(ParticleCloudException e) {
+                Log.e("SOME_TAG", e.getBestMessage());
+
+            }
+
+        });
+
+
+        return myDevice[0];
     }
 }
 
@@ -83,10 +119,10 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.DeviceViewHolder> 
         }
     }
 
-    static List<ParticleDevice> devices;
+    static List<MyParticleDevice> devices;
 
-    RVAdapter(List<ParticleDevice> devices){
-        this.devices = devices;
+    RVAdapter(List<MyParticleDevice> devices){
+        RVAdapter.devices = devices;
     }
 
     @Override
@@ -97,8 +133,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.DeviceViewHolder> 
     @Override
     public DeviceViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.cardview, viewGroup, false);
-        DeviceViewHolder dvh = new DeviceViewHolder(v);
-        return dvh;
+        return new DeviceViewHolder(v);
     }
 
     @Override
