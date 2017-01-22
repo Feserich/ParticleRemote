@@ -63,7 +63,7 @@ public class RelayScrollingActivity extends AppCompatActivity {
     private Integer toggleTime;
     private static final String TAG = "RelayScrollingActivity";
     private Boolean switchedOnLowOutput = true;
-    private static final String lowCommand = "LOW ";                //add a Space to the "LOW" command, so that particle device can interpret toggleTime(same count of character as "HIGH")
+    private static final String lowCommand = "LOW ";                //add a Space to the "LOW" command, so that particle device can interpret toggleTime (same count of character as "HIGH")
     private static final String highCommand = "HIGH";
 
 
