@@ -3,6 +3,7 @@ package com.fese.particleremote;
 import android.content.Intent;
 
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -20,6 +21,8 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.afollestad.materialdialogs.simplelist.MaterialSimpleListAdapter;
+import com.afollestad.materialdialogs.simplelist.MaterialSimpleListItem;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -145,6 +148,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initializeParticleDeviceFunctions(){
 
+
         ParticleFunctions[0] = getString(R.string.particle_function_dialog_item1);
         ParticleFunctions[1] = getString(R.string.particle_function_dialog_item2);
         ParticleFunctions[2] = getString(R.string.particle_function_dialog_item3);
@@ -153,6 +157,69 @@ public class MainActivity extends AppCompatActivity {
 
     private void startParticleFunctionDialog(final String deviceID){
 
+        final MaterialSimpleListAdapter adapter = new MaterialSimpleListAdapter(new MaterialSimpleListAdapter.Callback() {
+            @Override
+            public void onMaterialListItemSelected(MaterialDialog dialog, int index, MaterialSimpleListItem item) {
+                switch (index) {
+                    case 0:
+                        Intent intentRelay = new Intent(MainActivity.this, RelayScrollingActivity.class);
+                        intentRelay.putExtra("deviceID", deviceID);
+                        MainActivity.this.startActivity(intentRelay);
+                        dialog.dismiss();
+                        break;
+                    case 1:
+                        Intent intentTempHumi = new Intent(MainActivity.this, TempHumiActivity.class);
+                        intentTempHumi.putExtra("deviceID", deviceID);
+                        MainActivity.this.startActivity(intentTempHumi);
+                        dialog.dismiss();
+                        break;
+                    case 2:
+                        Intent intentTempHoneywell = new Intent(MainActivity.this, TempHoneywellActivity.class);
+                        intentTempHoneywell.putExtra("deviceID", deviceID);
+                        MainActivity.this.startActivity(intentTempHoneywell);
+                        dialog.dismiss();
+                        break;
+                    case 3:
+                        Snackbar snackbarInfo = Snackbar
+                                .make(rv, "Comming soon...", Snackbar.LENGTH_LONG);
+                        snackbarInfo.show();
+                        dialog.dismiss();
+                        break;
+
+                }
+            }
+        });
+
+        adapter.add(new MaterialSimpleListItem.Builder(this)
+                .content(R.string.particle_function_dialog_item1)
+                .icon(R.drawable.ic_led_on_grey600_48dp)
+                .backgroundColor(Color.WHITE)
+                //.iconPaddingDp(2)
+                .build());
+        adapter.add(new MaterialSimpleListItem.Builder(this)
+                .content(R.string.particle_function_dialog_item2)
+                .icon(R.drawable.ic_chart_line_grey600_48dp)
+                .backgroundColor(Color.WHITE)
+                .build());
+        adapter.add(new MaterialSimpleListItem.Builder(this)
+                .content(R.string.particle_function_dialog_item3)
+                .icon(R.drawable.ic_thermometer_lines_grey600_48dp)
+                .backgroundColor(Color.WHITE)
+                .build());
+
+        adapter.add(new MaterialSimpleListItem.Builder(this)
+                .content(R.string.particle_function_dialog_item4)
+                .icon(R.drawable.ic_access_point_grey600_48dp)
+                .backgroundColor(Color.WHITE)
+                .build());
+
+        new MaterialDialog.Builder(this)
+                .title(R.string.title_function_dialog_list)
+                .adapter(adapter, null)
+                .show();
+
+
+        /*
         new MaterialDialog.Builder(MainActivity.this)
                 .title(R.string.title_function_dialog_list)
                 .items(ParticleFunctions)
@@ -185,6 +252,9 @@ public class MainActivity extends AppCompatActivity {
                     }
                 })
                 .show();
+
+
+                */
 
 
     }
