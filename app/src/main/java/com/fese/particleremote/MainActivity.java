@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -36,14 +35,12 @@ import io.particle.android.sdk.cloud.ParticleCloudSDK;
 import io.particle.android.sdk.devicesetup.ParticleDeviceSetupLibrary;
 import io.particle.android.sdk.utils.Async;
 
-import static com.fese.particleremote.R.color.colorAccent;
 
 
 public class MainActivity extends AppCompatActivity {
 
     private RecyclerView rv;
     private SwipeRefreshLayout mSwipeRefreshLayout;
-    private String[] ParticleFunctions = new String[4];
     private List<MyParticleDevice> RVdevices;
     private List<io.particle.android.sdk.cloud.ParticleDevice> availableDevices;
     private SharedPreferences deviceListSharedPref;
@@ -128,7 +125,6 @@ public class MainActivity extends AppCompatActivity {
         ParticleCloudSDK.init(this);
         ParticleDeviceSetupLibrary.init(this.getApplicationContext(), MainActivity.class);
         checkLoginStatus();
-        initializeParticleDeviceFunctions();
 
 
 
@@ -146,14 +142,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void initializeParticleDeviceFunctions(){
-
-
-        ParticleFunctions[0] = getString(R.string.particle_function_dialog_item1);
-        ParticleFunctions[1] = getString(R.string.particle_function_dialog_item2);
-        ParticleFunctions[2] = getString(R.string.particle_function_dialog_item3);
-        ParticleFunctions[3] = getString(R.string.particle_function_dialog_item4);
-    }
 
     private void startParticleFunctionDialog(final String deviceID){
 
@@ -217,44 +205,6 @@ public class MainActivity extends AppCompatActivity {
                 .title(R.string.title_function_dialog_list)
                 .adapter(adapter, null)
                 .show();
-
-
-        /*
-        new MaterialDialog.Builder(MainActivity.this)
-                .title(R.string.title_function_dialog_list)
-                .items(ParticleFunctions)
-                .itemsCallback(new MaterialDialog.ListCallback() {
-                    @Override
-                    public void onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
-                        switch (which) {
-                            case 0:
-                                Intent intentRelay = new Intent(MainActivity.this, RelayScrollingActivity.class);
-                                intentRelay.putExtra("deviceID", deviceID);
-                                MainActivity.this.startActivity(intentRelay);
-                                break;
-                            case 1:
-                                Intent intentTempHumi = new Intent(MainActivity.this, TempHumiActivity.class);
-                                intentTempHumi.putExtra("deviceID", deviceID);
-                                MainActivity.this.startActivity(intentTempHumi);
-                                break;
-                            case 2:
-                                Intent intentTempHoneywell = new Intent(MainActivity.this, TempHoneywellActivity.class);
-                                intentTempHoneywell.putExtra("deviceID", deviceID);
-                                MainActivity.this.startActivity(intentTempHoneywell);
-                                break;
-                            case 3:
-                                Snackbar snackbarInfo = Snackbar
-                                        .make(rv, "Comming soon...", Snackbar.LENGTH_LONG);
-                                snackbarInfo.show();
-                                break;
-
-                        }
-                    }
-                })
-                .show();
-
-
-                */
 
 
     }
