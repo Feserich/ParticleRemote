@@ -10,13 +10,11 @@ import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.NavUtils;
-import android.support.v4.text.TextUtilsCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -65,7 +63,8 @@ public class RelayScrollingActivity extends AppCompatActivity {
     private Integer toggleTime;
     private static final String TAG = "RelayScrollingActivity";
     private Boolean switchedOnLowOutput = true;
-
+    private static final String lowCommand = "LOW ";                //add a Space to the "LOW" command, so that particle device can interpret toggleTime (same count of character as "HIGH")
+    private static final String highCommand = "HIGH";
 
 
     @Override
@@ -99,15 +98,15 @@ public class RelayScrollingActivity extends AppCompatActivity {
 
                     if (switchedOnLowOutput){
                         //relay is switched on low output
-                        commandValue = (relay.isSwitched) ? "HIGH " : "LOW";
+                        commandValue = (relay.isSwitched) ? highCommand : lowCommand;
                     }
                     else {
                         //relay is switched on high output
-                        commandValue = (relay.isSwitched) ? "LOW " : "HIGH";
+                        commandValue = (relay.isSwitched) ? lowCommand : highCommand;
                     }
 
                     //the commands in functionCommandList will be executed by the Particle device
-                    functionCommandList = new ArrayList<String>();
+                    functionCommandList = new ArrayList<>();
                     functionCommandList.add(relay.pin);
                     functionCommandList.add(commandValue);
                     functionCommandList.add(relay.toggleTime.toString());
@@ -118,7 +117,7 @@ public class RelayScrollingActivity extends AppCompatActivity {
 
                     } catch (io.particle.android.sdk.cloud.ParticleDevice.FunctionDoesNotExistException e) {
                         Snackbar snackbarError = Snackbar
-                                .make(recyclerView, e.getMessage().toString(), Snackbar.LENGTH_LONG);
+                                .make(recyclerView, e.getMessage(), Snackbar.LENGTH_LONG);
                         snackbarError.show();
                         relay.tryToSwitch = false;
                     }
@@ -132,7 +131,7 @@ public class RelayScrollingActivity extends AppCompatActivity {
 
                         //only change isSwitched if there is no toggle time
                         if (relay.toggleTime == 0){
-                            relay.isSwitched = (switchedOnLowOutput) ? (commandValue.equals("LOW")) :(commandValue.equals("HIGH"));
+                            relay.isSwitched = (switchedOnLowOutput) ? (commandValue.equals(lowCommand)) :(commandValue.equals(highCommand));
                         }
                         relay.tryToSwitch = false;
 
@@ -191,6 +190,7 @@ public class RelayScrollingActivity extends AppCompatActivity {
         //get the ID of the selected Particle Device from the MainActivity
         myParticleID = (String) getIntent().getSerializableExtra("deviceID");
 
+
         Async.executeAsync(ParticleCloudSDK.getCloud(), new Async.ApiWork<ParticleCloud, Void>() {
 
             public Void callApi(ParticleCloud particleCloud) throws ParticleCloudException, IOException {
@@ -211,6 +211,8 @@ public class RelayScrollingActivity extends AppCompatActivity {
 
         });
 
+
+
     }
 
     private void storeRelays (){
@@ -220,7 +222,7 @@ public class RelayScrollingActivity extends AppCompatActivity {
         String json = gson.toJson(listRelays);
         //store this Json string in Shared Preferences
         prefsEditor.putString(getString(R.string.saved_relay_shared_pref_key) + myParticleID, json);
-        prefsEditor.commit();
+        prefsEditor.apply();
 
     }
 
@@ -257,7 +259,7 @@ public class RelayScrollingActivity extends AppCompatActivity {
 
         //Initialize Variables
         boolean wrapInScrollView = true;
-        final ArrayList<String> Arr_TimeUnitSpinner = new ArrayList<String>();
+        final ArrayList<String> Arr_TimeUnitSpinner = new ArrayList<>();
         Arr_TimeUnitSpinner.clear();
         Arr_TimeUnitSpinner.add(getString(R.string.second_short));
         Arr_TimeUnitSpinner.add(getString(R.string.minute_short));
@@ -267,8 +269,8 @@ public class RelayScrollingActivity extends AppCompatActivity {
 
 
 
-        List<String> Arr_PinsSpinner = new LinkedList<String>(Arrays.asList(getResources().getStringArray(R.array.DigitalPins)));
-        List<String> Arr_AOPinsSpinner = new LinkedList<String>(Arrays.asList(getResources().getStringArray(R.array.AnalogPins)));
+        List<String> Arr_PinsSpinner = new LinkedList<>(Arrays.asList(getResources().getStringArray(R.array.DigitalPins)));
+        List<String> Arr_AOPinsSpinner = new LinkedList<>(Arrays.asList(getResources().getStringArray(R.array.AnalogPins)));
 
         for (String analogPin : Arr_AOPinsSpinner) {
             Arr_PinsSpinner.add(analogPin);
@@ -286,7 +288,7 @@ public class RelayScrollingActivity extends AppCompatActivity {
         if (listRelays!=null){                      //show only DO Pins which aren't used from other Relays
             for (Relay relay: listRelays)
             {
-                Arr_PinsSpinner.remove(relay.pin.toString());
+                Arr_PinsSpinner.remove(relay.pin);
             }
         }
 
@@ -339,12 +341,12 @@ public class RelayScrollingActivity extends AppCompatActivity {
 
         //set the items from the Array above into the Spinner
         pinSpinner = (Spinner) dialog.getCustomView().findViewById(R.id.relayPinSpinner);
-        ArrayAdapter<String> PinSpinnerAdapter = new ArrayAdapter<String>(RelayScrollingActivity.this, android.R.layout.simple_spinner_item, Arr_PinsSpinner);
+        ArrayAdapter<String> PinSpinnerAdapter = new ArrayAdapter<>(RelayScrollingActivity.this, android.R.layout.simple_spinner_item, Arr_PinsSpinner);
         PinSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         pinSpinner.setAdapter(PinSpinnerAdapter);
 
         SpinnerTimeUnit = (Spinner) dialog.getCustomView().findViewById(R.id.relayTimerUnitSpinner);
-        ArrayAdapter<String> TimeUnitSpinnerAdapter = new ArrayAdapter<String>(RelayScrollingActivity.this, android.R.layout.simple_spinner_item, Arr_TimeUnitSpinner);
+        ArrayAdapter<String> TimeUnitSpinnerAdapter = new ArrayAdapter<>(RelayScrollingActivity.this, android.R.layout.simple_spinner_item, Arr_TimeUnitSpinner);
         TimeUnitSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         SpinnerTimeUnit.setAdapter(TimeUnitSpinnerAdapter);
         SpinnerTimeUnit.setEnabled(false);
@@ -380,24 +382,30 @@ public class RelayScrollingActivity extends AppCompatActivity {
 
 
         collapsingToolbar = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
-        collapsingToolbar.setTitle("Toggle Relay");
+        if (collapsingToolbar != null) {
+            collapsingToolbar.setTitle("Toggle Relay");
+        }
 
         relaySharedPref = getPreferences(MODE_PRIVATE);
 
         recyclerView = (RecyclerView) findViewById(R.id.relayList);
-        recyclerView.setHasFixedSize(true);
+        if (recyclerView != null) {
+            recyclerView.setHasFixedSize(true);
+        }
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
 
 
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_newRelay);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showAddNewRelayPopup();
-            }
-        });
+        if (fab != null) {
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    showAddNewRelayPopup();
+                }
+            });
+        }
 
 
         RVadapterRelay.RelayViewHolder.setOnItemClickListener(new RVadapterRelay.OnItemClickListener() {
@@ -415,7 +423,7 @@ public class RelayScrollingActivity extends AppCompatActivity {
         RVadapterRelay.RelayViewHolder.setOnItemLongClickListener(new RVadapterRelay.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClicked(String pin) {
-                //TODO: show relay properties (edit name, edit pin (dropdown menu), checkbox for confirmation?)
+                //TODO: show relay properties (edit name, edit pin (dropdown menu), checkbox for confirmation?).
                 return false;
             }
         });

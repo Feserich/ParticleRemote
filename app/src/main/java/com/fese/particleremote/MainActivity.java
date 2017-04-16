@@ -3,6 +3,7 @@ package com.fese.particleremote;
 import android.content.Intent;
 
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -19,6 +20,8 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.afollestad.materialdialogs.simplelist.MaterialSimpleListAdapter;
+import com.afollestad.materialdialogs.simplelist.MaterialSimpleListItem;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -33,12 +36,12 @@ import io.particle.android.sdk.devicesetup.ParticleDeviceSetupLibrary;
 import io.particle.android.sdk.utils.Async;
 
 
+
 public class MainActivity extends AppCompatActivity {
 
     private RecyclerView rv;
     private SwipeRefreshLayout mSwipeRefreshLayout;
-    private String[] ParticleFunctions = new String[4];
-    private List<ParticleDevice> RVdevices;
+    private List<MyParticleDevice> RVdevices;
     private List<io.particle.android.sdk.cloud.ParticleDevice> availableDevices;
     private SharedPreferences deviceListSharedPref;
 
@@ -50,7 +53,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.activity_main_swipe_refresh_layout);
-        mSwipeRefreshLayout.setColorSchemeResources(R.color.colorAccent, R.color.blue, R.color.green);
+        if (mSwipeRefreshLayout != null) {
+            mSwipeRefreshLayout.setColorSchemeResources(R.color.colorAccent, R.color.blue, R.color.green);
+        }
         rv = (RecyclerView) findViewById(R.id.deviceList);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         rv.setLayoutManager(linearLayoutManager);
@@ -71,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onParticleDeviceClicked(String deviceID) {
                 if (RVdevices != null) {
-                    for (ParticleDevice device : RVdevices) {
+                    for (MyParticleDevice device : RVdevices) {
                         if (deviceID.equals("test device")) {
                             Snackbar snackbarInfo = Snackbar
                                     .make(rv, "Selected device is a virtual test device!", Snackbar.LENGTH_LONG);
@@ -105,12 +110,14 @@ public class MainActivity extends AppCompatActivity {
 
         //Setup a new Particle Device
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_setupDevice);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ParticleDeviceSetupLibrary.startDeviceSetup(MainActivity.this);
-            }
-        });
+        if (fab != null) {
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ParticleDeviceSetupLibrary.startDeviceSetup(MainActivity.this);
+                }
+            });
+        }
 
 
         //call Method on Create
@@ -118,7 +125,6 @@ public class MainActivity extends AppCompatActivity {
         ParticleCloudSDK.init(this);
         ParticleDeviceSetupLibrary.init(this.getApplicationContext(), MainActivity.class);
         checkLoginStatus();
-        initializeParticleDeviceFunctions();
 
 
 
@@ -126,57 +132,78 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void initializeTestDeviceList() {
-        RVdevices.add(new ParticleDevice("*Electron Test Device", "test device", "ELECTRON", false));
-        RVdevices.add(new ParticleDevice("*Core Test Device", "test device", "CORE", true));
-        RVdevices.add(new ParticleDevice("*Electron Test Device", "test device", "ELECTRON", false));
-        RVdevices.add(new ParticleDevice("*Electron Test Device", "test device", "ELECTRON", false));
-        RVdevices.add(new ParticleDevice("*Electron Test Device", "test device", "ELECTRON", false));
-        RVdevices.add(new ParticleDevice("*Electron Test Device", "test device", "ELECTRON", false));
+        RVdevices.add(new MyParticleDevice("*Electron Test Device", "test device", "ELECTRON", false));
+        RVdevices.add(new MyParticleDevice("*Core Test Device", "test device", "CORE", true));
+        RVdevices.add(new MyParticleDevice("*Electron Test Device", "test device", "ELECTRON", false));
+        RVdevices.add(new MyParticleDevice("*Electron Test Device", "test device", "ELECTRON", false));
+        RVdevices.add(new MyParticleDevice("*Electron Test Device", "test device", "ELECTRON", false));
+        RVdevices.add(new MyParticleDevice("*Electron Test Device", "test device", "ELECTRON", false));
 
 
     }
 
-    private void initializeParticleDeviceFunctions(){
-
-        ParticleFunctions[0] = getString(R.string.particle_function_dialog_item1);
-        ParticleFunctions[1] = getString(R.string.particle_function_dialog_item2);
-        ParticleFunctions[2] = getString(R.string.particle_function_dialog_item3);
-        ParticleFunctions[3] = getString(R.string.particle_function_dialog_item4);
-    }
 
     private void startParticleFunctionDialog(final String deviceID){
 
-        new MaterialDialog.Builder(MainActivity.this)
-                .title(R.string.title_function_dialog_list)
-                .items(ParticleFunctions)
-                .itemsCallback(new MaterialDialog.ListCallback() {
-                    @Override
-                    public void onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
-                        switch (which) {
-                            case 0:
-                                Intent intentRelay = new Intent(MainActivity.this, RelayScrollingActivity.class);
-                                intentRelay.putExtra("deviceID", deviceID);
-                                MainActivity.this.startActivity(intentRelay);
-                                break;
-                            case 1:
-                                Intent intentTempHumi = new Intent(MainActivity.this, TempHumiActivity.class);
-                                intentTempHumi.putExtra("deviceID", deviceID);
-                                MainActivity.this.startActivity(intentTempHumi);
-                                break;
-                            case 2:
-                                Intent intentTempHoneywell = new Intent(MainActivity.this, TempHoneywellActivity.class);
-                                intentTempHoneywell.putExtra("deviceID", deviceID);
-                                MainActivity.this.startActivity(intentTempHoneywell);
-                                break;
-                            case 3:
-                                Snackbar snackbarInfo = Snackbar
-                                        .make(rv, "Comming soon...", Snackbar.LENGTH_LONG);
-                                snackbarInfo.show();
-                                break;
+        final MaterialSimpleListAdapter adapter = new MaterialSimpleListAdapter(new MaterialSimpleListAdapter.Callback() {
+            @Override
+            public void onMaterialListItemSelected(MaterialDialog dialog, int index, MaterialSimpleListItem item) {
+                switch (index) {
+                    case 0:
+                        Intent intentRelay = new Intent(MainActivity.this, RelayScrollingActivity.class);
+                        intentRelay.putExtra("deviceID", deviceID);
+                        MainActivity.this.startActivity(intentRelay);
+                        dialog.dismiss();
+                        break;
+                    case 1:
+                        Intent intentTempHumi = new Intent(MainActivity.this, TempHumiActivity.class);
+                        intentTempHumi.putExtra("deviceID", deviceID);
+                        MainActivity.this.startActivity(intentTempHumi);
+                        dialog.dismiss();
+                        break;
+                    case 2:
+                        Intent intentTempHoneywell = new Intent(MainActivity.this, TempHoneywellActivity.class);
+                        intentTempHoneywell.putExtra("deviceID", deviceID);
+                        MainActivity.this.startActivity(intentTempHoneywell);
+                        dialog.dismiss();
+                        break;
+                    case 3:
+                        Snackbar snackbarInfo = Snackbar
+                                .make(rv, "Comming soon...", Snackbar.LENGTH_LONG);
+                        snackbarInfo.show();
+                        dialog.dismiss();
+                        break;
 
-                        }
-                    }
-                })
+                }
+            }
+        });
+
+        adapter.add(new MaterialSimpleListItem.Builder(this)
+                .content(R.string.particle_function_dialog_item1)
+                .icon(R.drawable.ic_led_on_grey600_48dp)
+                .backgroundColor(Color.WHITE)
+                //.iconPaddingDp(2)
+                .build());
+        adapter.add(new MaterialSimpleListItem.Builder(this)
+                .content(R.string.particle_function_dialog_item2)
+                .icon(R.drawable.ic_chart_line_grey600_48dp)
+                .backgroundColor(Color.WHITE)
+                .build());
+        adapter.add(new MaterialSimpleListItem.Builder(this)
+                .content(R.string.particle_function_dialog_item3)
+                .icon(R.drawable.ic_thermometer_lines_grey600_48dp)
+                .backgroundColor(Color.WHITE)
+                .build());
+
+        adapter.add(new MaterialSimpleListItem.Builder(this)
+                .content(R.string.particle_function_dialog_item4)
+                .icon(R.drawable.ic_access_point_grey600_48dp)
+                .backgroundColor(Color.WHITE)
+                .build());
+
+        new MaterialDialog.Builder(this)
+                .title(R.string.title_function_dialog_list)
+                .adapter(adapter, null)
                 .show();
 
 
@@ -197,7 +224,7 @@ public class MainActivity extends AppCompatActivity {
         String json = gson.toJson(RVdevices);
         //store this Json string in Shared Preferences
         prefsEditor.putString(getString(R.string.saved_particle_device_shared_pref_key), json);
-        prefsEditor.commit();
+        prefsEditor.apply();
 
     }
 
@@ -206,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
         //load the Json String. If no string is available the device list is null
         String json = deviceListSharedPref.getString(getString(R.string.saved_particle_device_shared_pref_key), "");
         //transform the Json string into the original device list
-        RVdevices = gson.fromJson(json, new TypeToken<List<ParticleDevice>>() {}.getType());
+        RVdevices = gson.fromJson(json, new TypeToken<List<MyParticleDevice>>() {}.getType());
 
         //if no String is available RVdevices is set to null!
         if (RVdevices == null){
@@ -250,11 +277,11 @@ public class MainActivity extends AppCompatActivity {
                 return ParticleCloudSDK.getCloud().getDevices();
             }
 
-            public void onSuccess(List<io.particle.android.sdk.cloud.ParticleDevice> devices) {
+            public void onSuccess( List<io.particle.android.sdk.cloud.ParticleDevice> devices) {
                 availableDevices = devices;
                 RVdevices.clear();
                 for (io.particle.android.sdk.cloud.ParticleDevice device : availableDevices) {
-                    RVdevices.add(new ParticleDevice(device.getName(), device.getID(), device.getDeviceType().toString(), device.isConnected()));
+                    RVdevices.add(new MyParticleDevice(device.getName(), device.getID(), device.getDeviceType().toString(), device.isConnected()));
                 }
                 //initializeTestDeviceList();
                 rv.getAdapter().notifyDataSetChanged();
