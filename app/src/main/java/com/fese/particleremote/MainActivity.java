@@ -256,7 +256,7 @@ public class MainActivity extends AppCompatActivity {
                 for (io.particle.android.sdk.cloud.ParticleDevice device : availableDevices) {
                     RVdevices.add(new ParticleDevice(device.getName(), device.getID(), device.getDeviceType().toString(), device.isConnected()));
                 }
-                initializeTestDeviceList();
+                //initializeTestDeviceList();
                 rv.getAdapter().notifyDataSetChanged();
                 mSwipeRefreshLayout.setRefreshing(false);
                 storeDeviceList();
@@ -280,6 +280,8 @@ public class MainActivity extends AppCompatActivity {
         Intent intentLogin = new Intent(MainActivity.this, LoginActivity.class);
         MainActivity.this.startActivity(intentLogin);
     }
+
+
 
 
     @Override
@@ -312,6 +314,11 @@ public class MainActivity extends AppCompatActivity {
                         mSwipeRefreshLayout.setRefreshing(true);
                     }
                 });
+                return true;
+
+            case R.id.menu_credits:
+                Intent intentCredits = new Intent(MainActivity.this, CreditsActivity.class);
+                MainActivity.this.startActivity(intentCredits);
                 return true;
 
             case R.id.menu_settings:

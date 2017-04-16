@@ -102,7 +102,9 @@ public class TempHumiActivity extends AppCompatActivity {
     }
 
 
+
     private void getTemperatureAndHumidity(){
+
         if (myParticleDevice != null) {
             Async.executeAsync(ParticleCloudSDK.getCloud(), new Async.ApiWork<ParticleCloud, Boolean>() {
 
