@@ -40,21 +40,26 @@ public class TempHumiActivity extends AppCompatActivity {
     private TextView humidityTV;
     private String myParticleID = null;
     private io.particle.android.sdk.cloud.ParticleDevice myParticleDevice;
-    private String CloudVariableTemp = "temperature";
-    private String CloudVariableHumi = "humidity";
     double temperatureVal;
     double humidityVal;
+    String temperatureValuesChain = "";
+    String humidityValuesChain = "";
     private LineChart tempHumiChart;
     private ArrayList<ILineDataSet> dataSets;
     final android.os.Handler handler = new android.os.Handler();
     private View viewTempHumi;
 
 
+    //static
     private int refresh_cycle;                                          //unit: [ms]
     private static final float MIN_TEMPERATURE_DEFAULT_VALUE = 10;
     private static final float MAX_TEMPERATURE_DEFAULT_VALUE = 30;
     private static final float MIN_HUMIDITY_DEFAULT_VALUE = 0;
     private static final float MAX_HUMIDITY_DEFAULT_VALUE = 100;
+    private static final String CloudVariableTempLabel = "temperature";
+    private static final String CloudVariableHumiLabel = "humidity";
+    private static final String CloudVariableTempHistoryLabel = "tempRec";
+    private static final String CloudVariableHumiHistoryLabel = "humiRec";
 
 
     @Override
@@ -99,6 +104,7 @@ public class TempHumiActivity extends AppCompatActivity {
         getParticleDeviceInstance();
         getTemperatureAndHumidity();
 
+
     }
 
 
@@ -113,8 +119,8 @@ public class TempHumiActivity extends AppCompatActivity {
                     boolean success = false;
 
                     try {
-                        temperatureVal = myParticleDevice.getDoubleVariable(CloudVariableTemp);
-                        humidityVal = myParticleDevice.getDoubleVariable(CloudVariableHumi);
+                        temperatureVal = myParticleDevice.getDoubleVariable(CloudVariableTempLabel);
+                        humidityVal = myParticleDevice.getDoubleVariable(CloudVariableHumiLabel);
                         success = true;
                     }
 
@@ -130,7 +136,7 @@ public class TempHumiActivity extends AppCompatActivity {
 
                 public void onSuccess(Boolean onSuccess) {
                     if (onSuccess){
-                        addTempHumiValueToChart(temperatureVal, humidityVal);
+                        //addTempHumiValueToChart((float) temperatureVal, (float) humidityVal, refresh_cycle/1000);
                         setValuesToEditText();
                     }
 
@@ -148,8 +154,92 @@ public class TempHumiActivity extends AppCompatActivity {
             });
 
         }
+        else {
+            handler.postDelayed(new Runnable() {
+                public void run() {
+                    getTemperatureAndHumidity();
+                }
+            }, 1000);
+        }
+    }
 
 
+
+
+
+    //TODO: add menu "clear diagramm"
+    //TODO: add menu "fast record"
+    //TODO: add menu "show history"
+    //TODO: show the units for x-Axis => diffrent in fast record and history
+    //TODO: Timestamp for the x-axis in history mode
+
+
+    private void getTemperatureAndHumidityHistory(){
+
+
+        if (myParticleDevice != null) {
+            Async.executeAsync(ParticleCloudSDK.getCloud(), new Async.ApiWork<ParticleCloud, Boolean>() {
+
+                @Override
+                public Boolean callApi(ParticleCloud particleCloud) throws ParticleCloudException, IOException {
+                    boolean success = false;
+
+                    try {
+                        temperatureValuesChain = myParticleDevice.getStringVariable(CloudVariableTempHistoryLabel);
+                        humidityValuesChain = myParticleDevice.getStringVariable(CloudVariableHumiHistoryLabel);
+                        success = true;
+                    }
+
+                    catch (ParticleDevice.VariableDoesNotExistException e){
+                        //Log.e("SOME_TAG", e.getMessage().toString());
+                        Snackbar snackbarError = Snackbar
+                                .make(viewTempHumi, e.getMessage().toString(), Snackbar.LENGTH_LONG);
+                        snackbarError.show();
+                    }
+
+                    return success;
+                }
+
+                public void onSuccess(Boolean onSuccess) {
+                    if (onSuccess){
+
+                        String[] temperatureValuesArray = temperatureValuesChain.split(";");
+                        String[] humidityValuesArray = humidityValuesChain.split(";");
+
+                        for(int i = 0; i < temperatureValuesArray.length; i++)
+                        {
+                            addTempHumiValueToChart(Float.parseFloat(temperatureValuesArray[i])/10, Float.parseFloat(humidityValuesArray[i]), 1);
+                        }
+
+
+                    }
+
+                }
+
+                public void onFailure(ParticleCloudException e) {
+                    Log.e("SOME_TAG", e.getBestMessage());
+                    Snackbar snackbarError = Snackbar
+                            .make(viewTempHumi, e.getBestMessage(), Snackbar.LENGTH_LONG);
+                    snackbarError.show();
+
+                }
+
+
+            });
+
+        }
+        else {
+            handler.postDelayed(new Runnable() {
+                public void run() {
+                    getTemperatureAndHumidityHistory();
+                }
+            }, 1000);
+        }
+    }
+
+    private void clearDiagram(){
+        LineData data = tempHumiChart.getData();
+        data.clearValues();
     }
 
     private void setValuesToEditText(){
@@ -160,9 +250,10 @@ public class TempHumiActivity extends AppCompatActivity {
         humidityTV.setText(getString(R.string.humidity) + ": " + String.valueOf(humidityVal) + " %");
     }
 
-    private void addTempHumiValueToChart(double temperatureValueX, double humidityValueX){
+    private void addTempHumiValueToChart(float temperatureValueY, float humidityValueY, float timeValueX){
 
         LineData data = tempHumiChart.getData();
+
 
         if (data != null) {
             ILineDataSet tempSet = data.getDataSetByIndex(0);
@@ -180,17 +271,17 @@ public class TempHumiActivity extends AppCompatActivity {
                 dataSets.add(humiSet);
             }
 
-            if (temperatureValueX < MIN_TEMPERATURE_DEFAULT_VALUE){
+            if (temperatureValueY < MIN_TEMPERATURE_DEFAULT_VALUE){
                 YAxis yAxisLeft = tempHumiChart.getAxisLeft();
                 yAxisLeft.resetAxisMinimum();
             }
-            else if (temperatureValueX > MAX_TEMPERATURE_DEFAULT_VALUE){
+            else if (temperatureValueY > MAX_TEMPERATURE_DEFAULT_VALUE){
                 YAxis yAxisLeft = tempHumiChart.getAxisLeft();
                 yAxisLeft.resetAxisMaximum();
             }
 
-            data.addEntry(new Entry(tempSet.getEntryCount() * (refresh_cycle/1000), (float) temperatureValueX), 0);
-            data.addEntry(new Entry(humiSet.getEntryCount() * (refresh_cycle/1000), (float) humidityValueX), 1);
+            data.addEntry(new Entry(tempSet.getEntryCount() * timeValueX, temperatureValueY), 0);
+            data.addEntry(new Entry(humiSet.getEntryCount() * timeValueX, humidityValueY), 1);
             data.notifyDataChanged();
 
             // let the chart know it's data has changed
@@ -284,7 +375,7 @@ public class TempHumiActivity extends AppCompatActivity {
     }
 
 
-    //TODO: start a service in the background for recording the data + a notification message (battery drain!)
+
     private Runnable getNewValuesRunnable = new Runnable() {
         @Override
         public void run() {
@@ -306,6 +397,8 @@ public class TempHumiActivity extends AppCompatActivity {
     {
         getRefreshCycleFromSettings();
         handler.post(getNewValuesRunnable);
+        clearDiagram();
+        getTemperatureAndHumidityHistory();
         super.onResume();
     }
 
@@ -330,6 +423,15 @@ public class TempHumiActivity extends AppCompatActivity {
             case R.id.menu_settings:
                 Intent intentSettings = new Intent(TempHumiActivity.this, UserSettingsActivity.class);
                 TempHumiActivity.this.startActivity(intentSettings);
+                return true;
+
+            case R.id.menu_history:
+                clearDiagram();
+                getTemperatureAndHumidityHistory();
+                return true;
+
+            case R.id.menu_clear_diagram:
+                clearDiagram();
                 return true;
 
             default:
