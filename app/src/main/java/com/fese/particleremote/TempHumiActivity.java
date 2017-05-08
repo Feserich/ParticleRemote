@@ -208,7 +208,17 @@ public class TempHumiActivity extends AppCompatActivity {
 
                         for(int i = 0; i < temperatureValuesArray.length; i++)
                         {
-                            addTempHumiValueToChart(Float.parseFloat(temperatureValuesArray[i])/10, Float.parseFloat(humidityValuesArray[i]), 1);
+
+                            try {
+                                addTempHumiValueToChart(Float.parseFloat(temperatureValuesArray[i])/10, Float.parseFloat(humidityValuesArray[i]), 1);
+                            }
+                            catch(NumberFormatException ex) {
+                                Log.e("SOME_TAG", ex.getMessage());
+                                Snackbar snackbarNumberCheck = Snackbar
+                                        .make(viewTempHumi, "No values in history available!", Snackbar.LENGTH_LONG);
+                                snackbarNumberCheck.show();
+                            }
+
                         }
 
 
