@@ -137,7 +137,17 @@ public class TempHumiActivity extends AppCompatActivity {
                 public void onSuccess(Boolean onSuccess) {
                     if (onSuccess){
                         //addTempHumiValueToChart((float) temperatureVal, (float) humidityVal, refresh_cycle/1000);
-                        setValuesToEditText();
+                        if (temperatureVal == -100 || humidityVal == -100)
+                        {
+                            Snackbar snackbarError = Snackbar
+                                    .make(viewTempHumi, R.string.DHT22_error_snackbar_message, Snackbar.LENGTH_LONG);
+                            snackbarError.show();
+                        }
+                        else
+                        {
+                            setValuesToEditText();
+                        }
+
                     }
 
                 }
@@ -215,7 +225,7 @@ public class TempHumiActivity extends AppCompatActivity {
                             catch(NumberFormatException ex) {
                                 Log.e("SOME_TAG", ex.getMessage());
                                 Snackbar snackbarNumberCheck = Snackbar
-                                        .make(viewTempHumi, "No values in history available!", Snackbar.LENGTH_LONG);
+                                        .make(viewTempHumi, R.string.empty_value_temperature_history_snackbar_message, Snackbar.LENGTH_LONG);
                                 snackbarNumberCheck.show();
                             }
 
