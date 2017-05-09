@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
+import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
@@ -26,9 +27,15 @@ import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
+import org.joda.time.format.DateTimeFormatter;
+
 import java.io.IOException;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 import io.particle.android.sdk.cloud.*;
 import io.particle.android.sdk.cloud.ParticleDevice;
@@ -48,6 +55,7 @@ public class TempHumiActivity extends AppCompatActivity {
     private ArrayList<ILineDataSet> dataSets;
     final android.os.Handler handler = new android.os.Handler();
     private View viewTempHumi;
+    //private Long referenceTimestamp = ((System.currentTimeMillis()/1000) - (25 * 3600));
 
 
     //static
@@ -78,6 +86,19 @@ public class TempHumiActivity extends AppCompatActivity {
         LineData data = new LineData(dataSets);
         tempHumiChart.setData(data);
         tempHumiChart.getDescription().setEnabled(false);
+
+
+        //TODO: show a MarkerView, class is prepared in the bottom code, xml layout can be found in the github link (also at the bottom)
+
+        //MyMarkerView myMarkerView= new MyMarkerView(getApplicationContext(), R.layout.my_marker_view_layout, referenceTimestamp);
+        //mChart.setMarkerView(myMarkerView);
+
+        //Format the time xAxis
+        XAxis xAxis = tempHumiChart.getXAxis();
+        xAxis.setValueFormatter(new MyXAxisTimeFormatter());
+        //xAxis.setAxisMinimum(0);
+        //xAxis.setAxisMaximum(25 * 3600 * 1000);
+        xAxis.setLabelCount(6, true);
 
         //Format the humidity yAxis
         YAxis yAxisRight = tempHumiChart.getAxisRight();
@@ -177,11 +198,7 @@ public class TempHumiActivity extends AppCompatActivity {
 
 
 
-    //TODO: add menu "clear diagramm"
-    //TODO: add menu "fast record"
-    //TODO: add menu "show history"
-    //TODO: show the units for x-Axis => diffrent in fast record and history
-    //TODO: Timestamp for the x-axis in history mode
+    //TODO: add menu "fast record" => show in the diagram the "live" values
 
 
     private void getTemperatureAndHumidityHistory(){
@@ -216,11 +233,13 @@ public class TempHumiActivity extends AppCompatActivity {
                         String[] temperatureValuesArray = temperatureValuesChain.split(";");
                         String[] humidityValuesArray = humidityValuesChain.split(";");
 
-                        for(int i = 0; i < temperatureValuesArray.length; i++)
+                        //TODO: get a timestamp of the last value, e.g.: array[0] = lastTimestamp (the newest value could be 0-59min old)
+                        //displaying the oldest value in the array first
+                        for(int i = (temperatureValuesArray.length - 1); i >= 0; i--)
                         {
 
                             try {
-                                addTempHumiValueToChart(Float.parseFloat(temperatureValuesArray[i])/10, Float.parseFloat(humidityValuesArray[i]), 1);
+                                addTempHumiValueToChart(Float.parseFloat(temperatureValuesArray[i])/10, Float.parseFloat(humidityValuesArray[i]), (System.currentTimeMillis()/1000 - (i * 3600)));
                             }
                             catch(NumberFormatException ex) {
                                 Log.e("SOME_TAG", ex.getMessage());
@@ -300,15 +319,15 @@ public class TempHumiActivity extends AppCompatActivity {
                 yAxisLeft.resetAxisMaximum();
             }
 
-            data.addEntry(new Entry(tempSet.getEntryCount() * timeValueX, temperatureValueY), 0);
-            data.addEntry(new Entry(humiSet.getEntryCount() * timeValueX, humidityValueY), 1);
+            data.addEntry(new Entry(timeValueX, temperatureValueY), 0);
+            data.addEntry(new Entry(timeValueX, humidityValueY), 1);
             data.notifyDataChanged();
 
             // let the chart know it's data has changed
             tempHumiChart.notifyDataSetChanged();
 
             // limit the number of visible entries
-            tempHumiChart.setVisibleXRangeMaximum(3600);
+            tempHumiChart.setVisibleXRangeMaximum(48*3600);
             // tempHumiChart.setVisibleYRange(30, AxisDependency.LEFT);
 
             // move to the latest entry
@@ -463,6 +482,48 @@ public class TempHumiActivity extends AppCompatActivity {
 
 }
 
+class MyXAxisTimeFormatter implements IAxisValueFormatter {
+
+    //private long referenceTimestamp; // minimum timestamp in your data set
+    private DateFormat mDataFormat;
+    private Date mDate;
+
+    public MyXAxisTimeFormatter() {
+        //this.referenceTimestamp = referenceTimestamp;
+        this.mDataFormat = new SimpleDateFormat("EEE, HH:mm", Locale.ENGLISH);
+        this.mDate = new Date();
+    }
+
+
+
+    @Override
+    public String getFormattedValue(float value, AxisBase axis) {
+        // convertedTimestamp = originalTimestamp - referenceTimestamp
+        long convertedTimestamp = (long) value;
+
+        // Retrieve original timestamp
+        //long originalTimestamp = referenceTimestamp + convertedTimestamp;
+
+        // Convert timestamp to hour:minute
+        return getHour(convertedTimestamp);
+    }
+
+
+    public int getDecimalDigits() {
+        return 0;
+    }
+
+    private String getHour(long timestamp){
+        try{
+            mDate.setTime(timestamp*1000);
+            return mDataFormat.format(mDate);
+        }
+        catch(Exception ex){
+            return "xx";
+        }
+    }
+}
+
 class MyYAxisTemperatureFormatter implements IAxisValueFormatter {
 
     private DecimalFormat mFormat;
@@ -494,3 +555,64 @@ class MyYAxisHumidityFormatter implements IAxisValueFormatter {
         return mFormat.format(value) + " %"; // e.g. append a dollar-sign
     }
 }
+
+/**
+ * The following class for the MarkerView must be edited
+ * The conversion of the referenceTimestamp must be deleted for my solution
+ * See MyXAxisTimeFormatter
+ *
+ * https://github.com/PhilJay/MPAndroidChart/issues/789#issuecomment-241507904
+ *
+ */
+
+
+/*
+public class MyMarkerView extends MarkerView {
+
+    private TextView tvContent;
+    private long referenceTimestamp;  // minimum timestamp in your data set
+    private DateFormat mDataFormat;
+    private Date mDate;
+
+    public MyMarkerView (Context context, int layoutResource, long referenceTimestamp) {
+        super(context, layoutResource);
+        // this markerview only displays a textview
+        tvContent = (TextView) findViewById(R.id.tvContent);
+        this.referenceTimestamp = referenceTimestamp;
+        this.mDataFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
+        this.mDate = new Date();
+    }
+
+    // callbacks everytime the MarkerView is redrawn, can be used to update the
+    // content (user-interface)
+    @Override
+    public void refreshContent(Entry e, Highlight highlight) {
+        long currentTimestamp = (int)e.getX() + referenceTimestamp;
+
+        tvContent.setText(e.getY() + "% at " + getTimedate(currentTimestamp)); // set the entry-value as the display text
+    }
+
+    @Override
+    public int getXOffset(float xpos) {
+        // this will center the marker-view horizontally
+        return -(getWidth() / 2);
+    }
+
+    @Override
+    public int getYOffset(float ypos) {
+        // this will cause the marker-view to be above the selected value
+        return -getHeight();
+    }
+
+    private String getTimedate(long timestamp){
+
+        try{
+            mDate.setTime(timestamp*1000);
+            return mDataFormat.format(mDate);
+        }
+        catch(Exception ex){
+            return "xx";
+        }
+    }
+}
+*/
