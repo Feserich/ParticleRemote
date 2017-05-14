@@ -233,13 +233,23 @@ public class TempHumiActivity extends AppCompatActivity {
                         String[] temperatureValuesArray = temperatureValuesChain.split(";");
                         String[] humidityValuesArray = humidityValuesChain.split(";");
 
-                        //TODO: get a timestamp of the last value, e.g.: array[0] = lastTimestamp (the newest value could be 0-59min old)
+                        float lastValueUpdateTimestamp = 0;
+
+                        //check if the lastValueUpdateTimestamp is in the humidity array
+                        if (humidityValuesArray.length > temperatureValuesArray.length){
+                            lastValueUpdateTimestamp = Float.parseFloat(humidityValuesArray[humidityValuesArray.length - 1]);
+                        }
+                        else{
+                            lastValueUpdateTimestamp = System.currentTimeMillis()/1000;                                                 //should never be called. inexact timestamp (the newest value could be 0-59min old)
+                        }
+
+
                         //displaying the oldest value in the array first
                         for(int i = (temperatureValuesArray.length - 1); i >= 0; i--)
                         {
 
                             try {
-                                addTempHumiValueToChart(Float.parseFloat(temperatureValuesArray[i])/10, Float.parseFloat(humidityValuesArray[i]), (System.currentTimeMillis()/1000 - (i * 3600)));
+                                addTempHumiValueToChart(Float.parseFloat(temperatureValuesArray[i])/10, Float.parseFloat(humidityValuesArray[i]), (lastValueUpdateTimestamp - (i * 3600)));
                             }
                             catch(NumberFormatException ex) {
                                 Log.e("SOME_TAG", ex.getMessage());
@@ -327,11 +337,13 @@ public class TempHumiActivity extends AppCompatActivity {
             tempHumiChart.notifyDataSetChanged();
 
             // limit the number of visible entries
-            tempHumiChart.setVisibleXRangeMaximum(48*3600);
+            tempHumiChart.setVisibleXRangeMaximum(48*3600);                     //visible entries for the last two days = 48h
             // tempHumiChart.setVisibleYRange(30, AxisDependency.LEFT);
 
+            //TODO: move the view to the newest value. The Code below doesn't work
             // move to the latest entry
             tempHumiChart.moveViewToX(data.getEntryCount());
+
 
             // this automatically refreshes the chart (calls invalidate())
             // mChart.moveViewTo(data.getXValCount()-7, 55f,
