@@ -157,9 +157,9 @@
     <string name="set_dht22_input_pin_title">Set input pin for DHT22</string>
     <string name="set_dht22_input_pin_summary">Must be changed also in Particle Code! Default: D6</string>
     <string name="set_dht22_input_pin_dialogTitle">Set input pin</string>
-    <string name="set_chart_refresh_cycle_title">Set chart refresh cycle</string>
-    <string name="set_chart_refresh_cycle_summary">Set the seconds till a new point will be added to the chart</string>
-    <string name="set_chart_refresh_cycle_dialogTitle">Set chart refresh cycle [s]</string>
+    <string name="set_chart_refresh_cycle_title">Set value update cycle</string>
+    <string name="set_chart_refresh_cycle_summary">Set the seconds till a new value will be loaded</string>
+    <string name="set_chart_refresh_cycle_dialogTitle">Set value update cycle [s]</string>
     <string name="toggle_relay_low_output_summaryOff">Relay is switched when output level is 3 Volt</string>
     <string name="toggle_relay_low_output_summaryOn">Relay is switched when output level is GND</string>
     <string name="toggle_relay_low_output_title">Switched on LOW Output</string>
