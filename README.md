@@ -4,6 +4,8 @@ The connection is over the internet through the [Particle Cloud](https://www.par
 The app uses the [Particle Android Cloud SDK](https://github.com/spark/spark-sdk-android) to call functions or read values from the Particle device.
 I've tried to build simpel and flexibel UI based on the [Material Design](https://github.com/spark/spark-sdk-android) guidelines. 
 
+The related code for the Particle device is in [my other repository](https://github.com/Feserich/Particle_Remote-Poton_Code).
+
 
 The Android app together with the Particle board can do following tasks: 
 * Set the temperature for the _Honeywell HR-20_ radiator regulator (memory manipulation over serial-test interface)
