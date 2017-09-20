@@ -7,12 +7,13 @@ I've tried to build simpel and flexibel UI based on the [Material Design](https:
 The related code for the Particle device is in [my other repository](https://github.com/Feserich/ParticleRemote-PhotonCode).
 
 
-The Android app together with the Particle board can do following tasks: 
-* Set the temperature for the _Honeywell HR-20_ radiator regulator (memory manipulation over serial-test interface)
-* Switch some relays 
-* Read the current temperature and moisture with a DHT22 sensor
-* Show the temperature and moisture history in a chart (over the last 6 days)
-* Add and control multiple Particle devices 
+This Android app together with the Particle board can do following tasks: 
+* Set the temperature for the _Honeywell HR-20_ radiator regulator (memory manipulation over programming/debugging interface. 
+More Infos [here](http://symlink.dk/projects/rondo485/).).
+* Switch some relays.
+* Read the current temperature and moisture with a DHT22 sensor.
+* Show the temperature and moisture history in a chart (over the last 6 days).
+* Add and control multiple Particle devices.
 
 **Here are some screenshots of my app:**
 
