@@ -27,6 +27,8 @@ import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import io.particle.android.sdk.cloud.ParticleCloud;
@@ -71,6 +73,9 @@ public class MainActivity extends AppCompatActivity {
         RVAdapter adapter = new RVAdapter(RVdevices);
         rv.setAdapter(adapter);
 
+
+        //TODO: add a settings menu to each device cardview (content: rename, hide, select available functions, settings)
+        https://stackoverflow.com/questions/34641240/toolbar-inside-cardview-to-create-a-popup-menu-overflow-icon
 
         RVAdapter.DeviceViewHolder.setOnParticleDeviceClickedListener(new RVAdapter.OnParticleDeviceClickedListener() {
             @Override
@@ -280,6 +285,16 @@ public class MainActivity extends AppCompatActivity {
             public void onSuccess( List<io.particle.android.sdk.cloud.ParticleDevice> devices) {
                 availableDevices = devices;
                 RVdevices.clear();
+
+                //sort the objects in 'availableDevice' alphabetically (without the order is random)
+                Collections.sort(availableDevices, new Comparator<io.particle.android.sdk.cloud.ParticleDevice>()
+                {
+                    @Override
+                    public int compare(io.particle.android.sdk.cloud.ParticleDevice device1, io.particle.android.sdk.cloud.ParticleDevice device2) {
+                        return device1.getName().compareTo(device2.getName());
+                    }
+                });
+
                 for (io.particle.android.sdk.cloud.ParticleDevice device : availableDevices) {
                     RVdevices.add(new MyParticleDevice(device.getName(), device.getID(), device.getDeviceType().toString(), device.isConnected()));
                 }

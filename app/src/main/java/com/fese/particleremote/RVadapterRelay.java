@@ -66,15 +66,15 @@ public class RVadapterRelay extends RecyclerView.Adapter<RVadapterRelay.RelayVie
 
 
         if(relays.get(position).tryToSwitch){
-            relayViewHolder.relayStatus.setText("try to Switch");
+            relayViewHolder.relayStatus.setText("switching...");
             relayViewHolder.relayPhoto.setImageResource(R.drawable.ic_led_off_grey600_48dp);
         }
         else if (relays.get(position).isSwitched){
-            relayViewHolder.relayStatus.setText("Switched");
+            relayViewHolder.relayStatus.setText("energized");
             relayViewHolder.relayPhoto.setImageResource(R.drawable.ic_led_on_grey600_48dp);
         }
         else {
-            relayViewHolder.relayStatus.setText("Not switched");
+            relayViewHolder.relayStatus.setText("de-energized");
             relayViewHolder.relayPhoto.setImageResource(R.drawable.ic_led_variant_off_grey600_48dp);
         }
 
