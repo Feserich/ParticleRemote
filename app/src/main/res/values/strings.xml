@@ -267,6 +267,7 @@
     </string>
     <string name="DHT22_error_snackbar_message">Can\'t read sensor values!</string>
     <string name="empty_value_temperature_history_snackbar_message">No values in history available!</string>
+    <string name="restore_default_relays">Restore default relays</string>
 
 
 </resources>

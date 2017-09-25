@@ -239,6 +239,17 @@ public class RelayScrollingActivity extends AppCompatActivity {
         }
     }
 
+    private void restoreDefaultRelays (){
+        //for a fast restore of default relays => Sourcecode compilation on different PCs deletes all saved settings (app must be reinstalled)
+
+        listRelays.add(new Relay("Computer", "D1", false, false, false, 0));
+        listRelays.add(new Relay("Markise ausfahren", "D1", false, false, false, 0));
+        listRelays.add(new Relay("Markise einfahren", "D0", false, false, false, 0));
+        recyclerView.getAdapter().notifyDataSetChanged();
+
+        storeRelays();
+    }
+
     private void showConfirmationPopup(final Relay relay){
         new MaterialDialog.Builder(this)
                 .title(R.string.relay_toggle_confirmation_title)
@@ -494,6 +505,12 @@ public class RelayScrollingActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.home:
                 NavUtils.navigateUpFromSameTask(this);
+                return true;
+
+            case R.id.menu_restore_default_relays:
+                //for a fast restore of default relays => Sourcecode compilation on different PCs deletes all saved settings (app must be reinstalled)
+                restoreDefaultRelays();
+
                 return true;
 
             case R.id.menu_settings:
