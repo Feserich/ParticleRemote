@@ -242,7 +242,7 @@ public class RelayScrollingActivity extends AppCompatActivity {
     private void restoreDefaultRelays (){
         //for a fast restore of default relays => Sourcecode compilation on different PCs deletes all saved settings (app must be reinstalled)
 
-        listRelays.add(new Relay("Computer", "D1", false, false, false, 0));
+        listRelays.add(new Relay("Computer", "D2", false, true, false, 1));
         listRelays.add(new Relay("Markise ausfahren", "D1", false, false, false, 0));
         listRelays.add(new Relay("Markise einfahren", "D0", false, false, false, 0));
         recyclerView.getAdapter().notifyDataSetChanged();
