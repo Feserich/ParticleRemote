@@ -295,6 +295,7 @@ public class TempHumiActivity extends AppCompatActivity {
     private void clearDiagram(){
         LineData data = tempHumiChart.getData();
         data.clearValues();
+        tempHumiChart.notifyDataSetChanged();
     }
 
     private void setValuesToEditText(){
