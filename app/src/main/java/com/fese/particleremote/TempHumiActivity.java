@@ -58,12 +58,15 @@ public class TempHumiActivity extends AppCompatActivity {
     //private Long referenceTimestamp = ((System.currentTimeMillis()/1000) - (25 * 3600));
 
 
+
+
     //static
     private int refresh_cycle;                                          //unit: [ms]
     private static final float MIN_TEMPERATURE_DEFAULT_VALUE = 10;
     private static final float MAX_TEMPERATURE_DEFAULT_VALUE = 30;
     private static final float MIN_HUMIDITY_DEFAULT_VALUE = 0;
     private static final float MAX_HUMIDITY_DEFAULT_VALUE = 100;
+    private static final float X_AXIS_VISIBLE_RANGE = 48 * 3600;                     //visible entries for the last two days = 48h
     private static final String CloudVariableTempLabel = "temperature";
     private static final String CloudVariableHumiLabel = "humidity";
     private static final String CloudVariableTempHistoryLabel = "tempRec";
@@ -259,6 +262,9 @@ public class TempHumiActivity extends AppCompatActivity {
                             }
 
                         }
+                        //move visible range to the newest values
+                        tempHumiChart.moveViewToX(lastValueUpdateTimestamp - X_AXIS_VISIBLE_RANGE + 100);               //100 = Offset to display the last X-Axis label value on the right
+
 
 
                     }
@@ -337,17 +343,9 @@ public class TempHumiActivity extends AppCompatActivity {
             tempHumiChart.notifyDataSetChanged();
 
             // limit the number of visible entries
-            tempHumiChart.setVisibleXRangeMaximum(48*3600);                     //visible entries for the last two days = 48h
+            tempHumiChart.setVisibleXRangeMaximum(X_AXIS_VISIBLE_RANGE);
             // tempHumiChart.setVisibleYRange(30, AxisDependency.LEFT);
 
-            //TODO: move the view to the newest value. The Code below doesn't work
-            // move to the latest entry
-            tempHumiChart.moveViewToX(data.getEntryCount());
-
-
-            // this automatically refreshes the chart (calls invalidate())
-            // mChart.moveViewTo(data.getXValCount()-7, 55f,
-            // AxisDependency.LEFT);
 
         }
 
