@@ -5,20 +5,21 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 
 import java.io.IOException;
 import java.util.List;
 
-import io.particle.android.sdk.cloud.ParticleCloud;
-import io.particle.android.sdk.cloud.ParticleCloudException;
-import io.particle.android.sdk.cloud.ParticleCloudSDK;
-import io.particle.android.sdk.cloud.ParticleDevice;
-import io.particle.android.sdk.utils.Async;
+import static com.fese.particleremote.RVAdapter.DeviceViewHolder.mDeviceMenuClickListener;
+
 
 /**
  * Created by Fabia on 21.01.2016.
@@ -29,12 +30,17 @@ class MyParticleDevice {
     String deviceID;
     String model;
     boolean isConnected;
+    boolean hideDevice;
+    Integer[] availableFunctions;
 
-    MyParticleDevice(String deviceName, String deviceID, String model, boolean isConnected) {
+
+    MyParticleDevice(String deviceName, String deviceID, String model, boolean isConnected, boolean hideDevice, Integer[] availableFunctions) {
         this.deviceName = deviceName;
         this.deviceID = deviceID;
         this.model = model;
         this.isConnected = isConnected;
+        this.hideDevice = hideDevice;
+        this.availableFunctions = availableFunctions;
     }
 
 }
@@ -42,8 +48,13 @@ class MyParticleDevice {
 public class RVAdapter extends RecyclerView.Adapter<RVAdapter.DeviceViewHolder> {
 
 
+
     public interface OnParticleDeviceClickedListener {
         void onParticleDeviceClicked(String deviceID);
+    }
+
+    public interface OnDeviceMenuItemClickListener {
+        void onDeviceMenuItemClicked(String deviceID, MenuItem menuItem);
     }
 
 
@@ -56,12 +67,20 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.DeviceViewHolder> 
         ImageView devicePhoto;
         ImageView statusLED;
         View view;
+        ImageButton ib_device_menu;
 
 
 
         private static OnParticleDeviceClickedListener mParticleClickListener;
+
         public static void setOnParticleDeviceClickedListener(OnParticleDeviceClickedListener l) {
             mParticleClickListener = l;
+        }
+
+
+        static OnDeviceMenuItemClickListener mDeviceMenuClickListener;
+        public static void setOnMenuItemClickListener(OnDeviceMenuItemClickListener l) {
+            mDeviceMenuClickListener = l;
         }
 
 
@@ -76,6 +95,9 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.DeviceViewHolder> 
             devicePhoto = (ImageView) itemView.findViewById(R.id.devicePhoto);
             statusLED = (ImageView) itemView.findViewById(R.id.statusLED);
             view = itemView;
+
+            ib_device_menu = (ImageButton) view.findViewById(R.id.imageButton_device_menu);
+
 
 
             view.setOnClickListener(new View.OnClickListener(){
@@ -111,7 +133,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.DeviceViewHolder> 
     }
 
     @Override
-    public void onBindViewHolder(RVAdapter.DeviceViewHolder deviceViewHolder, int i) {
+    public void onBindViewHolder(final RVAdapter.DeviceViewHolder deviceViewHolder, final int i) {
         deviceViewHolder.deviceName.setText(devices.get(i).deviceName);
         deviceViewHolder.deviceID.setText(devices.get(i).deviceID);
 
@@ -141,7 +163,36 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.DeviceViewHolder> 
                 deviceViewHolder.model.setText(devices.get(i).model);
         }
 
+
+        deviceViewHolder.ib_device_menu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showPopupMenu(deviceViewHolder.ib_device_menu, devices.get(i).deviceID);
+            }
+        });
+
     }
+
+    private void showPopupMenu(View view, final String deviceID) {
+        // inflate menu
+        final PopupMenu popup = new PopupMenu(view.getContext(),view );
+        MenuInflater inflater = popup.getMenuInflater();
+        inflater.inflate(R.menu.device_popup_menu, popup.getMenu());
+        //popup.setOnMenuItemClickListener(mDeviceMenuClickListener);
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                mDeviceMenuClickListener.onDeviceMenuItemClicked(deviceID, menuItem);
+                return false;
+            }
+        });
+
+
+        //mDeviceMenuClickListener.onDeviceMenuItemClicked(deviceID, popup);
+        popup.show();
+    }
+
+
 
 
 
@@ -150,4 +201,5 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.DeviceViewHolder> 
         return devices.size();
     }
 }
+
 

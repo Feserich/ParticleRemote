@@ -117,6 +117,14 @@
     <string name="honeywell_temp_pref_category_title">Honeywell Temperature Settings</string>
     <string name="relay_pref_category_title">Relay Settings</string>
     <string name="saved_particle_device_shared_pref_key">Saved Particle Devices:</string>
+
+    <string-array name="particle_function_dialog_items">
+        <item>Switch Relays</item>
+        <item><![CDATA[Read temperature & humidity]]></item>
+        <item>Set Honeywell temperature</item>
+        <item>Send commands over 433Mhz radio</item>
+    </string-array>
+
     <string name="particle_function_dialog_item1">Switch Relays</string>
     <string name="particle_function_dialog_item2"><![CDATA[Read temperature & humidity]]></string>
     <string name="particle_function_dialog_item3">Set Honeywell temperature</string>
@@ -268,6 +276,12 @@
     <string name="DHT22_error_snackbar_message">Can\'t read sensor values!</string>
     <string name="empty_value_temperature_history_snackbar_message">No values in history available!</string>
     <string name="restore_default_relays">Restore default relays</string>
+    <string name="unhide_all_devices">Unhide all devices</string>
+    <string name="rename_device">Rename device</string>
+    <string name="select_functions">Select functions</string>
+    <string name="hide_device">Hide device</string>
+    <string name="rename_device_dialog_content">Please enter a new name for the device:</string>
+    <string name="rename">Rename</string>
 
 
 </resources>

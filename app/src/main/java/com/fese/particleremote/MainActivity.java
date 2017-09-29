@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -13,12 +14,14 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.simplelist.MaterialSimpleListAdapter;
 import com.afollestad.materialdialogs.simplelist.MaterialSimpleListItem;
@@ -34,6 +37,7 @@ import java.util.List;
 import io.particle.android.sdk.cloud.ParticleCloud;
 import io.particle.android.sdk.cloud.ParticleCloudException;
 import io.particle.android.sdk.cloud.ParticleCloudSDK;
+import io.particle.android.sdk.cloud.ParticleDevice;
 import io.particle.android.sdk.devicesetup.ParticleDeviceSetupLibrary;
 import io.particle.android.sdk.utils.Async;
 
@@ -46,6 +50,8 @@ public class MainActivity extends AppCompatActivity {
     private List<MyParticleDevice> RVdevices;
     private List<io.particle.android.sdk.cloud.ParticleDevice> availableDevices;
     private SharedPreferences deviceListSharedPref;
+
+
 
 
 
@@ -74,9 +80,6 @@ public class MainActivity extends AppCompatActivity {
         rv.setAdapter(adapter);
 
 
-        //TODO: add a settings menu to each device cardview (content: rename, hide, select available functions, settings)
-        https://stackoverflow.com/questions/34641240/toolbar-inside-cardview-to-create-a-popup-menu-overflow-icon
-
         RVAdapter.DeviceViewHolder.setOnParticleDeviceClickedListener(new RVAdapter.OnParticleDeviceClickedListener() {
             @Override
             public void onParticleDeviceClicked(String deviceID) {
@@ -88,12 +91,45 @@ public class MainActivity extends AppCompatActivity {
                             snackbarInfo.show();
                         }
                         else if (device.deviceID.equals(deviceID)) {
-                            startParticleFunctionDialog(deviceID);
+                            startParticleFunctionDialog(device);
                         }
 
                     }
                 }
             }
+        });
+
+
+        RVAdapter.DeviceViewHolder.setOnMenuItemClickListener(new RVAdapter.OnDeviceMenuItemClickListener(){
+
+            @Override
+            public void onDeviceMenuItemClicked(String deviceID, MenuItem menuItem) {
+                if (RVdevices != null) {
+                    for (MyParticleDevice device : RVdevices) {
+                        if (device.deviceID.equals(deviceID)) {
+                            switch (menuItem.getItemId()){
+                                case R.id.menu_select_available_device_functions:
+                                    showAvailableDeviceFunctionDialog(device);
+                                    break;
+                                case R.id.menu_rename_device:
+                                    showDeviceRenameDialog(device);
+                                    break;
+                                case R.id.menu_hide_device:
+                                    //TODO: find a method to hide specific devices in the RV
+                                    Snackbar snackbarInfo = Snackbar
+                                            .make(rv, "TODO", Snackbar.LENGTH_LONG);
+                                    snackbarInfo.show();
+                                    device.hideDevice = true;
+                                    rv.getAdapter().notifyDataSetChanged();
+                                    break;
+                            }
+
+                        }
+
+                    }
+                }
+            }
+
         });
 
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -135,20 +171,69 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void showDeviceRenameDialog(final MyParticleDevice device) {
+
+        new MaterialDialog.Builder(this)
+                .title(R.string.rename_device)
+                .content(R.string.rename_device_dialog_content)
+                .inputType(InputType.TYPE_CLASS_TEXT)
+                .input("Higgs boson", device.deviceName, new MaterialDialog.InputCallback() {
+                    @Override
+                    public void onInput(MaterialDialog dialog, CharSequence input) {
+                        device.deviceName = input.toString();
+                        rv.getAdapter().notifyDataSetChanged();
+                        for (ParticleDevice cloudDevice : availableDevices){
+                            if (device.deviceID.equals(cloudDevice.getID())){
+                                try {
+                                    cloudDevice.setName(input.toString());
+                                } catch (ParticleCloudException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                        storeDeviceList();
+                    }
+                })
+                .positiveText(R.string.rename)
+                .show();
+
+    }
+
+    private void showAvailableDeviceFunctionDialog(final MyParticleDevice device) {
+
+        Integer[] availableFunctions = device.availableFunctions;
+
+        new MaterialDialog.Builder(this)
+                .title("Available functions")
+                .items(R.array.particle_function_dialog_items)
+                .itemsCallbackMultiChoice(availableFunctions, new MaterialDialog.ListCallbackMultiChoice() {
+                    public boolean onSelection(MaterialDialog dialog, Integer[] which, CharSequence[] text) {
+
+                        device.availableFunctions = which;
+                        return true;
+                    }
+                })
+                .alwaysCallMultiChoiceCallback()
+                .negativeText("OK")
+                .show();
+
+        storeDeviceList();
+    }
+
 
     private void initializeTestDeviceList() {
-        RVdevices.add(new MyParticleDevice("*Electron Test Device", "test device", "ELECTRON", false));
-        RVdevices.add(new MyParticleDevice("*Core Test Device", "test device", "CORE", true));
-        RVdevices.add(new MyParticleDevice("*Electron Test Device", "test device", "ELECTRON", false));
-        RVdevices.add(new MyParticleDevice("*Electron Test Device", "test device", "ELECTRON", false));
-        RVdevices.add(new MyParticleDevice("*Electron Test Device", "test device", "ELECTRON", false));
-        RVdevices.add(new MyParticleDevice("*Electron Test Device", "test device", "ELECTRON", false));
+        RVdevices.add(new MyParticleDevice("*Electron Test Device", "test device", "ELECTRON", false, false, new Integer[] {}));
+        RVdevices.add(new MyParticleDevice("*Core Test Device", "test device", "CORE", true, false,  new Integer[] {}));
+        RVdevices.add(new MyParticleDevice("*Electron Test Device", "test device", "ELECTRON", false, false,  new Integer[] {}));
+        RVdevices.add(new MyParticleDevice("*Electron Test Device", "test device", "ELECTRON", false, false,  new Integer[] {}));
+        RVdevices.add(new MyParticleDevice("*Electron Test Device", "test device", "ELECTRON", false, false,  new Integer[] {}));
+        RVdevices.add(new MyParticleDevice("*Electron Test Device", "test device", "ELECTRON", false, false,  new Integer[] {}));
 
 
     }
 
 
-    private void startParticleFunctionDialog(final String deviceID){
+    private void startParticleFunctionDialog(final MyParticleDevice device){
 
         final MaterialSimpleListAdapter adapter = new MaterialSimpleListAdapter(new MaterialSimpleListAdapter.Callback() {
             @Override
@@ -156,19 +241,19 @@ public class MainActivity extends AppCompatActivity {
                 switch (index) {
                     case 0:
                         Intent intentRelay = new Intent(MainActivity.this, RelayScrollingActivity.class);
-                        intentRelay.putExtra("deviceID", deviceID);
+                        intentRelay.putExtra("deviceID", device.deviceID);
                         MainActivity.this.startActivity(intentRelay);
                         dialog.dismiss();
                         break;
                     case 1:
                         Intent intentTempHumi = new Intent(MainActivity.this, TempHumiActivity.class);
-                        intentTempHumi.putExtra("deviceID", deviceID);
+                        intentTempHumi.putExtra("deviceID", device.deviceID);
                         MainActivity.this.startActivity(intentTempHumi);
                         dialog.dismiss();
                         break;
                     case 2:
                         Intent intentTempHoneywell = new Intent(MainActivity.this, TempHoneywellActivity.class);
-                        intentTempHoneywell.putExtra("deviceID", deviceID);
+                        intentTempHoneywell.putExtra("deviceID", device.deviceID);
                         MainActivity.this.startActivity(intentTempHoneywell);
                         dialog.dismiss();
                         break;
@@ -183,28 +268,45 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        adapter.add(new MaterialSimpleListItem.Builder(this)
-                .content(R.string.particle_function_dialog_item1)
-                .icon(R.drawable.ic_led_on_grey600_48dp)
-                .backgroundColor(Color.WHITE)
-                //.iconPaddingDp(2)
-                .build());
-        adapter.add(new MaterialSimpleListItem.Builder(this)
-                .content(R.string.particle_function_dialog_item2)
-                .icon(R.drawable.ic_chart_line_grey600_48dp)
-                .backgroundColor(Color.WHITE)
-                .build());
-        adapter.add(new MaterialSimpleListItem.Builder(this)
-                .content(R.string.particle_function_dialog_item3)
-                .icon(R.drawable.ic_thermometer_lines_grey600_48dp)
-                .backgroundColor(Color.WHITE)
-                .build());
+        String[] particleFunctionArray = getResources().getStringArray(R.array.particle_function_dialog_items);
 
-        adapter.add(new MaterialSimpleListItem.Builder(this)
-                .content(R.string.particle_function_dialog_item4)
-                .icon(R.drawable.ic_access_point_grey600_48dp)
-                .backgroundColor(Color.WHITE)
-                .build());
+        for (Integer function : device.availableFunctions){
+            switch (function){
+                case 0:
+                    adapter.add(new MaterialSimpleListItem.Builder(this)
+                            .content(particleFunctionArray[0])
+                            .icon(R.drawable.ic_led_on_grey600_48dp)
+                            .backgroundColor(Color.WHITE)
+                            //.iconPaddingDp(2)
+                            .build());
+                    break;
+
+                case 1:
+                    adapter.add(new MaterialSimpleListItem.Builder(this)
+                            .content(R.string.particle_function_dialog_item2)
+                            .icon(R.drawable.ic_chart_line_grey600_48dp)
+                            .backgroundColor(Color.WHITE)
+                            .build());
+                    break;
+
+                case 2:
+                    adapter.add(new MaterialSimpleListItem.Builder(this)
+                            .content(R.string.particle_function_dialog_item3)
+                            .icon(R.drawable.ic_thermometer_lines_grey600_48dp)
+                            .backgroundColor(Color.WHITE)
+                            .build());
+                    break;
+
+                case 3:
+                    adapter.add(new MaterialSimpleListItem.Builder(this)
+                            .content(R.string.particle_function_dialog_item4)
+                            .icon(R.drawable.ic_access_point_grey600_48dp)
+                            .backgroundColor(Color.WHITE)
+                            .build());
+                    break;
+            }
+        }
+
 
         new MaterialDialog.Builder(this)
                 .title(R.string.title_function_dialog_list)
@@ -284,7 +386,7 @@ public class MainActivity extends AppCompatActivity {
 
             public void onSuccess( List<io.particle.android.sdk.cloud.ParticleDevice> devices) {
                 availableDevices = devices;
-                RVdevices.clear();
+                //RVdevices.clear();
 
                 //sort the objects in 'availableDevice' alphabetically (without the order is random)
                 Collections.sort(availableDevices, new Comparator<io.particle.android.sdk.cloud.ParticleDevice>()
@@ -296,7 +398,20 @@ public class MainActivity extends AppCompatActivity {
                 });
 
                 for (io.particle.android.sdk.cloud.ParticleDevice device : availableDevices) {
-                    RVdevices.add(new MyParticleDevice(device.getName(), device.getID(), device.getDeviceType().toString(), device.isConnected()));
+                    boolean newDevice = true;
+
+                    for (MyParticleDevice mDevice : RVdevices){
+                        if (device.getID().equals(mDevice.deviceID)){
+                            newDevice = false;
+                            mDevice.deviceName = device.getName();
+                            mDevice.isConnected = device.isConnected();
+                        }
+                    }
+
+                    if (newDevice){
+                        RVdevices.add(new MyParticleDevice(device.getName(), device.getID(), device.getDeviceType().toString(), device.isConnected(), false,  new Integer[] {0, 1, 2, 3, 4, 5, 6, 7, 8}));
+                    }
+
                 }
                 //initializeTestDeviceList();
                 rv.getAdapter().notifyDataSetChanged();
@@ -361,6 +476,14 @@ public class MainActivity extends AppCompatActivity {
             case R.id.menu_credits:
                 Intent intentCredits = new Intent(MainActivity.this, CreditsActivity.class);
                 MainActivity.this.startActivity(intentCredits);
+                return true;
+
+            case R.id.menu_unhide_devices:
+                for (MyParticleDevice device : RVdevices) {
+                    device.hideDevice = false;
+                }
+                storeDeviceList();
+                rv.getAdapter().notifyDataSetChanged();
                 return true;
 
             case R.id.menu_settings:

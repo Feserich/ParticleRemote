@@ -46,7 +46,6 @@ public class CreditsActivity extends AppCompatActivity {
         Credit credit = new Credit("Particle Android Cloud SDK", "Particle Industries, Inc.", "https://github.com/spark/spark-sdk-android", "Apache License, Version 2.0");
         creditList.add(credit);
 
-
         credit = new Credit("Particle Device Setup library", "Particle Industries, Inc.", "https://github.com/spark/spark-setup-android", "Apache License, Version 2.0");
         creditList.add(credit);
 
@@ -72,4 +71,6 @@ public class CreditsActivity extends AppCompatActivity {
 
         mAdapter.notifyDataSetChanged();
     }
+
+    //TODO: open source link on click
 }
