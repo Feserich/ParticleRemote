@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.List;
 
 import static com.fese.particleremote.RVAdapter.DeviceViewHolder.mDeviceMenuClickListener;
+import static com.fese.particleremote.RVAdapter.DeviceViewHolder.mParticleClickListener;
 
 
 /**
@@ -71,8 +72,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.DeviceViewHolder> 
 
 
 
-        private static OnParticleDeviceClickedListener mParticleClickListener;
-
+        static OnParticleDeviceClickedListener mParticleClickListener;
         public static void setOnParticleDeviceClickedListener(OnParticleDeviceClickedListener l) {
             mParticleClickListener = l;
         }
@@ -100,18 +100,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.DeviceViewHolder> 
 
 
 
-            view.setOnClickListener(new View.OnClickListener(){
-                @Override public void onClick(View itemView){
 
-                    if (mParticleClickListener != null) {
-                        final String ID = deviceID.getText().toString();
-                        mParticleClickListener.onParticleDeviceClicked(ID);
-
-                    }
-
-                }
-
-            });
         }
     }
 
@@ -135,7 +124,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.DeviceViewHolder> 
     @Override
     public void onBindViewHolder(final RVAdapter.DeviceViewHolder deviceViewHolder, final int i) {
         deviceViewHolder.deviceName.setText(devices.get(i).deviceName);
-        deviceViewHolder.deviceID.setText(devices.get(i).deviceID);
+        deviceViewHolder.deviceID.setText("ID: " + devices.get(i).deviceID);
 
         if (devices.get(i).isConnected){
             deviceViewHolder.statusLED.setImageResource(R.drawable.online_dot);
@@ -168,6 +157,16 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.DeviceViewHolder> 
             @Override
             public void onClick(View view) {
                 showPopupMenu(deviceViewHolder.ib_device_menu, devices.get(i).deviceID);
+            }
+        });
+
+        deviceViewHolder.view.setOnClickListener(new View.OnClickListener(){
+            @Override public void onClick(View itemView){
+
+                if (mParticleClickListener != null) {
+                    mParticleClickListener.onParticleDeviceClicked(devices.get(i).deviceID);
+
+                }
             }
         });
 

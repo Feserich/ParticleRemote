@@ -273,6 +273,7 @@ public class MainActivity extends AppCompatActivity {
         for (Integer function : device.availableFunctions){
             switch (function){
                 case 0:
+                    //Switch Relays
                     adapter.add(new MaterialSimpleListItem.Builder(this)
                             .content(particleFunctionArray[0])
                             .icon(R.drawable.ic_led_on_grey600_48dp)
@@ -282,24 +283,27 @@ public class MainActivity extends AppCompatActivity {
                     break;
 
                 case 1:
+                    //Read temperature and humidity
                     adapter.add(new MaterialSimpleListItem.Builder(this)
-                            .content(R.string.particle_function_dialog_item2)
+                            .content(particleFunctionArray[1])
                             .icon(R.drawable.ic_chart_line_grey600_48dp)
                             .backgroundColor(Color.WHITE)
                             .build());
                     break;
 
                 case 2:
+                    //Set honeywell temperature
                     adapter.add(new MaterialSimpleListItem.Builder(this)
-                            .content(R.string.particle_function_dialog_item3)
+                            .content(particleFunctionArray[2])
                             .icon(R.drawable.ic_thermometer_lines_grey600_48dp)
                             .backgroundColor(Color.WHITE)
                             .build());
                     break;
 
                 case 3:
+                    //send commands over MQTT-protocol
                     adapter.add(new MaterialSimpleListItem.Builder(this)
-                            .content(R.string.particle_function_dialog_item4)
+                            .content(particleFunctionArray[3])
                             .icon(R.drawable.ic_access_point_grey600_48dp)
                             .backgroundColor(Color.WHITE)
                             .build());
@@ -354,15 +358,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void logout() {
 
-        /*
-        //delete credentials in SharedPreferences
-        SharedPreferences mPrefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = mPrefs.edit();
-        editor.remove(emailKey);
-        editor.remove(passwordKey);
-        editor.apply();
-        */
-
         //delete device List
         SharedPreferences.Editor prefsEditor = deviceListSharedPref.edit();
         prefsEditor.remove(getString(R.string.saved_particle_device_shared_pref_key));
@@ -372,8 +367,6 @@ public class MainActivity extends AppCompatActivity {
         ParticleCloudSDK.getCloud().logOut();
 
         startLoginActivity();
-
-
     }
 
     public void getParticleDeviceListFromCloud() {

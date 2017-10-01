@@ -73,4 +73,5 @@ public class CreditsActivity extends AppCompatActivity {
     }
 
     //TODO: open source link on click
+    //startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.stackoverflow.com")));
 }

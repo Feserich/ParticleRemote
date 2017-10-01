@@ -21,6 +21,8 @@ class Credit {
     String creditLicence;
 
 
+
+
     Credit(String creditTitle, String creditAuthor, String creditLink, String creditLicence) {
         this.creditTitle = creditTitle;
         this.creditAuthor = creditAuthor;
@@ -32,12 +34,17 @@ class Credit {
 
 public class RVadapterCredits extends RecyclerView.Adapter<RVadapterCredits.CreditViewHolder> {
 
+
+
     public static class CreditViewHolder extends RecyclerView.ViewHolder {
         TextView creditTitle;
         TextView creditAuthor;
         TextView creditLink;
         TextView creditLicence;
         View view;
+
+
+
 
         public CreditViewHolder(View itemView) {
             super(itemView);
@@ -46,7 +53,7 @@ public class RVadapterCredits extends RecyclerView.Adapter<RVadapterCredits.Cred
             creditAuthor = (TextView) itemView.findViewById(R.id.tv_creditAuthor);
             creditLink = (TextView) itemView.findViewById(R.id.tv_creditLink);
             creditLicence = (TextView) itemView.findViewById(R.id.tv_creditLicence);
-
+            view = itemView;
 
         }
     }
@@ -73,6 +80,8 @@ public class RVadapterCredits extends RecyclerView.Adapter<RVadapterCredits.Cred
         holder.creditAuthor.setText("Copyright © " + credit.creditAuthor);
         holder.creditLink.setText(credit.creditLink);
         holder.creditLicence.setText(credit.creditLicence);
+
+
     }
 
 
