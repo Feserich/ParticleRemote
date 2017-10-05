@@ -1,5 +1,7 @@
 package com.fese.particleremote;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -37,6 +39,21 @@ public class CreditsActivity extends AppCompatActivity {
         recyclerView.setAdapter(mAdapter);
 
         initalizeCreditValues();
+
+
+
+
+        RVadapterCredits.CreditViewHolder.setOnCreditClickedListener(new RVadapterCredits.OnCreditClickedListener() {
+            @Override
+            public void onCreditClicked(String creditLink) {
+                Intent intent = new Intent();
+                intent.setData(Uri.parse(creditLink));
+                intent.setAction(Intent.ACTION_VIEW);
+                startActivity(intent);
+
+            }
+        });
+
 
 
     }

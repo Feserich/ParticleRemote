@@ -1,9 +1,7 @@
 package com.fese.particleremote;
 
-import android.support.design.widget.Snackbar;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -15,7 +13,6 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 
-import java.io.IOException;
 import java.util.List;
 
 import static com.fese.particleremote.RVAdapter.DeviceViewHolder.mDeviceMenuClickListener;
@@ -117,7 +114,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.DeviceViewHolder> 
 
     @Override
     public DeviceViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.cardview, viewGroup, false);
+        View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.cardview_device, viewGroup, false);
         return new DeviceViewHolder(v);
     }
 

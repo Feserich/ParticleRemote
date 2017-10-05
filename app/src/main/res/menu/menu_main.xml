@@ -15,17 +15,19 @@
             app:showAsAction="never"
             android:title="@string/logout"/>
 
-        <item
-            android:id="@+id/menu_credits"
-            android:orderInCategory="3"
-            app:showAsAction="never"
-            android:title="@string/title_activity_credits"/>
+
 
         <item
             android:id="@+id/menu_unhide_devices"
             android:orderInCategory="4"
             app:showAsAction="never"
             android:title="@string/unhide_all_devices"/>
+
+        <item
+            android:id="@+id/menu_about"
+            android:orderInCategory="9"
+            app:showAsAction="never"
+            android:title="@string/about"/>
 
         <item
             android:id="@+id/menu_settings"

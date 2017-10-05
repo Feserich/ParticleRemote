@@ -1,6 +1,5 @@
 package com.fese.particleremote;
 
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.List;
+
+import static com.fese.particleremote.RVadapterCredits.CreditViewHolder.mCreditClickListener;
 
 /**
  * Created by Fabian on 15-Apr-17.
@@ -34,7 +35,9 @@ class Credit {
 
 public class RVadapterCredits extends RecyclerView.Adapter<RVadapterCredits.CreditViewHolder> {
 
-
+    public interface OnCreditClickedListener {
+        void onCreditClicked(String creditLink);
+    }
 
     public static class CreditViewHolder extends RecyclerView.ViewHolder {
         TextView creditTitle;
@@ -44,6 +47,10 @@ public class RVadapterCredits extends RecyclerView.Adapter<RVadapterCredits.Cred
         View view;
 
 
+        static OnCreditClickedListener mCreditClickListener;
+        public static void setOnCreditClickedListener(OnCreditClickedListener l) {
+            mCreditClickListener = l;
+        }
 
 
         public CreditViewHolder(View itemView) {
@@ -56,6 +63,9 @@ public class RVadapterCredits extends RecyclerView.Adapter<RVadapterCredits.Cred
             view = itemView;
 
         }
+
+
+
     }
 
 
@@ -68,22 +78,31 @@ public class RVadapterCredits extends RecyclerView.Adapter<RVadapterCredits.Cred
 
 
     public RVadapterCredits.CreditViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.credit_list_row, viewGroup, false);
+        View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.cardview_credit, viewGroup, false);
         return new RVadapterCredits.CreditViewHolder(v);
 
     }
 
     @Override
     public void onBindViewHolder(RVadapterCredits.CreditViewHolder holder, int position) {
-        Credit credit = creditList.get(position);
+        final Credit credit = creditList.get(position);
         holder.creditTitle.setText(credit.creditTitle);
         holder.creditAuthor.setText("Copyright © " + credit.creditAuthor);
         holder.creditLink.setText(credit.creditLink);
         holder.creditLicence.setText(credit.creditLicence);
 
+        holder.view.setOnClickListener(new View.OnClickListener() {
 
+            @Override
+            public void onClick(View view) {
+                if (mCreditClickListener != null) {
+                    mCreditClickListener.onCreditClicked(credit.creditLink);
+
+                }
+
+            }
+        });
     }
-
 
 
 

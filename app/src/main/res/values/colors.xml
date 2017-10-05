@@ -5,6 +5,8 @@
     <color name="colorAccent">#FF9800</color>
 
     <color name="backgroundColorRV">#EEEEEE</color>
+    <color name="gray_light">#CCCCCC</color>
+    <color name="gray_very_light">#e0e0e0</color>
 
     <color name="green">#009900</color>
     <color name="blue">#000099</color>

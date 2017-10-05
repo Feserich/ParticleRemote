@@ -148,6 +148,7 @@
     <string name="temperature_loading">Temperature: loading...</string>
     <string name="humidity_loading">Humidity: loading...</string>
     <string name="email">Email</string>
+    <string name="about_version">Version: </string>
     <string name="password">Password</string>
     <string name="login">Login</string>
     <string name="temperature">Temperature</string>
@@ -277,6 +278,10 @@
     <string name="hide_device">Hide device</string>
     <string name="rename_device_dialog_content">Please enter a new name for the device:</string>
     <string name="rename">Rename</string>
+    <string name="about">About</string>
+    <string name="report_bug">Report bug</string>
+    <string name="source_code_on_github">Source Code on GitHub</string>
+    <string name="by_developer_name">by Fabian Fesenmayr</string>
 
 
 </resources>

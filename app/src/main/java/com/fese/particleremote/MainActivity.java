@@ -466,9 +466,11 @@ public class MainActivity extends AppCompatActivity {
                 });
                 return true;
 
-            case R.id.menu_credits:
-                Intent intentCredits = new Intent(MainActivity.this, CreditsActivity.class);
-                MainActivity.this.startActivity(intentCredits);
+
+
+            case R.id.menu_about:
+                Intent intentAbout = new Intent(MainActivity.this, AboutActivity.class);
+                MainActivity.this.startActivity(intentAbout);
                 return true;
 
             case R.id.menu_unhide_devices:
