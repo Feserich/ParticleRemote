@@ -242,11 +242,14 @@ public class RelayScrollingActivity extends AppCompatActivity {
     private void restoreDefaultRelays (){
         //for a fast restore of default relays => Sourcecode compilation on different PCs deletes all saved settings (app must be reinstalled)
 
-        listRelays.add(new Relay("Computer", "D2", false, true, false, 1));
-        listRelays.add(new Relay("Markise ausfahren", "D1", false, false, false, 0));
-        listRelays.add(new Relay("Markise einfahren", "D0", false, false, false, 0));
+        if (myParticleDevice.getID().equals("1d002f000e51353338363333")){
+            listRelays.add(new Relay("Computer", "D2", false, true, false, 1));
+        }
+        else if (myParticleDevice.getID().equals("35003d000f47343339383037")){
+            listRelays.add(new Relay("Markise ausfahren", "D1", false, false, false, 0));
+            listRelays.add(new Relay("Markise einfahren", "D0", false, false, false, 0));
+        }
         recyclerView.getAdapter().notifyDataSetChanged();
-
         storeRelays();
     }
 
