@@ -61,12 +61,13 @@ public class TempHumiActivity extends AppCompatActivity {
 
 
     //static
-    private int refresh_cycle;                                          //unit: [ms]
+    private int refresh_cycle;                                                      //unit: [ms]  for current values (not history array)
     private static final float MIN_TEMPERATURE_DEFAULT_VALUE = 10;
     private static final float MAX_TEMPERATURE_DEFAULT_VALUE = 30;
     private static final float MIN_HUMIDITY_DEFAULT_VALUE = 0;
     private static final float MAX_HUMIDITY_DEFAULT_VALUE = 100;
-    private static final float X_AXIS_VISIBLE_RANGE = 48 * 3600;                     //visible entries for the last two days = 48h
+    private static final float X_AXIS_VISIBLE_RANGE = 24 * 3600;                    //visible entries for the last two days = 48h
+    private static final int HISTORY_DIAGRAM_TIME_INTERVAL = 1800;                  // => 30min; time step between two values in the history array
     private static final String CloudVariableTempLabel = "temperature";
     private static final String CloudVariableHumiLabel = "humidity";
     private static final String CloudVariableTempHistoryLabel = "tempRec";
@@ -252,7 +253,7 @@ public class TempHumiActivity extends AppCompatActivity {
                         {
 
                             try {
-                                addTempHumiValueToChart(Float.parseFloat(temperatureValuesArray[i])/10, Float.parseFloat(humidityValuesArray[i]), (lastValueUpdateTimestamp - (i * 3600)));
+                                addTempHumiValueToChart(Float.parseFloat(temperatureValuesArray[i])/10, Float.parseFloat(humidityValuesArray[i]), (lastValueUpdateTimestamp - (i * HISTORY_DIAGRAM_TIME_INTERVAL)));
                             }
                             catch(NumberFormatException ex) {
                                 Log.e("SOME_TAG", ex.getMessage());
