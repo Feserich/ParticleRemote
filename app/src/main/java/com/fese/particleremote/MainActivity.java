@@ -210,6 +210,7 @@ public class MainActivity extends AppCompatActivity {
                     public boolean onSelection(MaterialDialog dialog, Integer[] which, CharSequence[] text) {
 
                         device.availableFunctions = which;
+                        storeDeviceList();
                         return true;
                     }
                 })
@@ -217,7 +218,6 @@ public class MainActivity extends AppCompatActivity {
                 .negativeText("OK")
                 .show();
 
-        storeDeviceList();
     }
 
 
