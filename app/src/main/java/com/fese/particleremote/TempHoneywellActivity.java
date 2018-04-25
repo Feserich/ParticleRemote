@@ -1,13 +1,11 @@
 package com.fese.particleremote;
-
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
@@ -16,25 +14,21 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
-import com.afollestad.materialdialogs.DialogAction;
-import com.afollestad.materialdialogs.MaterialDialog;
-
 import net.steamcrafted.loadtoast.LoadToast;
-
 
 import org.adw.library.widgets.discreteseekbar.DiscreteSeekBar;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
-import io.particle.android.sdk.cloud.*;
+import io.particle.android.sdk.cloud.ParticleCloud;
+import io.particle.android.sdk.cloud.ParticleCloudException;
+import io.particle.android.sdk.cloud.ParticleCloudSDK;
 import io.particle.android.sdk.cloud.ParticleDevice;
 import io.particle.android.sdk.utils.Async;
 
@@ -59,22 +53,22 @@ public class TempHoneywellActivity extends AppCompatActivity {
 
         targetTemp = getString(R.string.LOWEST_TEMPERATURE_SELECTION_VALUE);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.app_bar);
+        Toolbar toolbar = findViewById(R.id.app_bar);
         setSupportActionBar(toolbar);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
-        viewHoneywell = (RelativeLayout) findViewById(R.id.activity_temp_honeywell);
+        viewHoneywell = findViewById(R.id.activity_temp_honeywell);
 
         SharedPref  = PreferenceManager.getDefaultSharedPreferences(this);
 
-        Button btn_setTemp = (Button)findViewById(R.id.btn_setTargetTemp);
-        ts_targetTemp = (TextSwitcher)findViewById(R.id.ts_targetTemp);
+        Button btn_setTemp = findViewById(R.id.btn_setTargetTemp);
+        ts_targetTemp = findViewById(R.id.ts_targetTemp);
 
-        Button btn_setTempOff = (Button)findViewById(R.id.btn_tempOff);
-        Button btn_setTempComfort = (Button)findViewById(R.id.btn_tempComfort);
-        Button btn_setTempNight = (Button)findViewById(R.id.btn_tempNight);
+        Button btn_setTempOff = findViewById(R.id.btn_tempOff);
+        Button btn_setTempComfort = findViewById(R.id.btn_tempComfort);
+        Button btn_setTempNight = findViewById(R.id.btn_tempNight);
 
         setTempToast = new LoadToast(this);
         setTempToast.setText(getString(R.string.setting_temperature_toast_text));
@@ -102,7 +96,7 @@ public class TempHoneywellActivity extends AppCompatActivity {
         });
 
 
-        discreteSeekBarTargetTemp = (DiscreteSeekBar) findViewById(R.id.discrete_seekbar_target_temp);
+        discreteSeekBarTargetTemp = findViewById(R.id.discrete_seekbar_target_temp);
 
         discreteSeekBarTargetTemp.setNumericTransformer(new DiscreteSeekBar.NumericTransformer() {
             @Override
@@ -141,7 +135,7 @@ public class TempHoneywellActivity extends AppCompatActivity {
                     Integer success = 0;
 
                     //the commands in functionCommandList will be executed by the Particle device
-                    ArrayList functionCommandList = new ArrayList<String>();
+                    ArrayList<String> functionCommandList = new ArrayList<>();
                     functionCommandList.add(targetTempRAW);
 
                     try {
@@ -149,7 +143,7 @@ public class TempHoneywellActivity extends AppCompatActivity {
 
                     } catch (io.particle.android.sdk.cloud.ParticleDevice.FunctionDoesNotExistException e) {
                         Snackbar snackbarError = Snackbar
-                                .make(viewHoneywell, e.getMessage().toString(), Snackbar.LENGTH_LONG);
+                                .make(viewHoneywell, e.getMessage(), Snackbar.LENGTH_LONG);
                         snackbarError.show();
 
                     }
@@ -233,7 +227,7 @@ public class TempHoneywellActivity extends AppCompatActivity {
 
         Async.executeAsync(ParticleCloudSDK.getCloud(), new Async.ApiWork<ParticleCloud, Void>() {
 
-            public Void callApi(ParticleCloud particleCloud) throws ParticleCloudException, IOException {
+            public Void callApi(ParticleCloud particleCloud) throws ParticleCloudException {
                 myParticleDevice = ParticleCloudSDK.getCloud().getDevice(myParticleID);
                 return null;
             }

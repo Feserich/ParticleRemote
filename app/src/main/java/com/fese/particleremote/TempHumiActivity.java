@@ -61,16 +61,18 @@ public class TempHumiActivity extends AppCompatActivity {
 
 
     //static
-    private int refresh_cycle;                                          //unit: [ms]
+    private int refresh_cycle;                                          //unit:
+    private static final int RECORD_CYCLE_TEMP_HUMI_HISTORY = 1800;     //time interval in seconds when the particle device adds new values to the history
     private static final float MIN_TEMPERATURE_DEFAULT_VALUE = 10;
     private static final float MAX_TEMPERATURE_DEFAULT_VALUE = 30;
     private static final float MIN_HUMIDITY_DEFAULT_VALUE = 0;
     private static final float MAX_HUMIDITY_DEFAULT_VALUE = 100;
-    private static final float X_AXIS_VISIBLE_RANGE = 48 * 3600;                     //visible entries for the last two days = 48h
+    private static final float X_AXIS_VISIBLE_RANGE = 24 * 3600;                     //visible entries for the last day = 24h
     private static final String CloudVariableTempLabel = "temperature";
     private static final String CloudVariableHumiLabel = "humidity";
     private static final String CloudVariableTempHistoryLabel = "tempRec";
     private static final String CloudVariableHumiHistoryLabel = "humiRec";
+
 
 
     @Override
@@ -78,14 +80,14 @@ public class TempHumiActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_temp_humi);
 
-        temperatureTV = (TextView)findViewById(R.id.tv_temperature);
-        humidityTV = (TextView)findViewById(R.id.tv_humidity);
-        viewTempHumi = (RelativeLayout) findViewById(R.id.RelLay_tempHumi);
+        temperatureTV = findViewById(R.id.tv_temperature);
+        humidityTV = findViewById(R.id.tv_humidity);
+        viewTempHumi = findViewById(R.id.RelLay_tempHumi);
 
 
         //Init Line Chart
-        tempHumiChart = (LineChart) findViewById(R.id.tempHumiChart);
-        dataSets = new ArrayList<ILineDataSet>();
+        tempHumiChart = findViewById(R.id.tempHumiChart);
+        dataSets = new ArrayList<>();
         LineData data = new LineData(dataSets);
         tempHumiChart.setData(data);
         tempHumiChart.getDescription().setEnabled(false);
@@ -118,7 +120,7 @@ public class TempHumiActivity extends AppCompatActivity {
         yAxisLeft.setValueFormatter(new MyYAxisTemperatureFormatter());
 
         //set toolbar and navigate up arrow
-        android.support.v7.widget.Toolbar toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.app_bar);
+        android.support.v7.widget.Toolbar toolbar = findViewById(R.id.app_bar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
@@ -151,7 +153,7 @@ public class TempHumiActivity extends AppCompatActivity {
                     catch (ParticleDevice.VariableDoesNotExistException e){
                         //Log.e("SOME_TAG", e.getMessage().toString());
                         Snackbar snackbarError = Snackbar
-                                .make(viewTempHumi, e.getMessage().toString(), Snackbar.LENGTH_LONG);
+                                .make(viewTempHumi, e.getMessage(), Snackbar.LENGTH_LONG);
                         snackbarError.show();
                     }
 
@@ -223,7 +225,7 @@ public class TempHumiActivity extends AppCompatActivity {
                     catch (ParticleDevice.VariableDoesNotExistException e){
                         //Log.e("SOME_TAG", e.getMessage().toString());
                         Snackbar snackbarError = Snackbar
-                                .make(viewTempHumi, e.getMessage().toString(), Snackbar.LENGTH_LONG);
+                                .make(viewTempHumi, e.getMessage(), Snackbar.LENGTH_LONG);
                         snackbarError.show();
                     }
 
@@ -252,7 +254,7 @@ public class TempHumiActivity extends AppCompatActivity {
                         {
 
                             try {
-                                addTempHumiValueToChart(Float.parseFloat(temperatureValuesArray[i])/10, Float.parseFloat(humidityValuesArray[i]), (lastValueUpdateTimestamp - (i * 3600)));
+                                addTempHumiValueToChart(Float.parseFloat(temperatureValuesArray[i])/10, Float.parseFloat(humidityValuesArray[i]), (lastValueUpdateTimestamp - (i * RECORD_CYCLE_TEMP_HUMI_HISTORY)));
                             }
                             catch(NumberFormatException ex) {
                                 Log.e("SOME_TAG", ex.getMessage());
@@ -404,7 +406,7 @@ public class TempHumiActivity extends AppCompatActivity {
 
         Async.executeAsync(ParticleCloudSDK.getCloud(), new Async.ApiWork<ParticleCloud, Void>() {
 
-            public Void callApi(ParticleCloud particleCloud) throws ParticleCloudException, IOException {
+            public Void callApi(ParticleCloud particleCloud) throws ParticleCloudException {
                 myParticleDevice = ParticleCloudSDK.getCloud().getDevice(myParticleID);
                 return null;
             }
