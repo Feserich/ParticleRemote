@@ -40,7 +40,7 @@
             android:label="@string/title_activity_tempHoneywell"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme" />
-        //for particle device setup:
+
         <activity
             android:name="io.particle.android.sdk.devicesetup.ui.DiscoverDeviceActivity"
             android:label="@string/title_activity_discover_device"

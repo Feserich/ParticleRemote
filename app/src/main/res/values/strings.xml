@@ -282,6 +282,7 @@
     <string name="report_bug">Report bug</string>
     <string name="source_code_on_github">Source Code on GitHub</string>
     <string name="by_developer_name">by Fabian Fesenmayr</string>
+    <string name="future_temperature">Future Temperature</string>
 
 
 </resources>
