@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.icu.util.Calendar;
 import android.icu.util.GregorianCalendar;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.NavUtils;
@@ -20,6 +21,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.RelativeLayout;
+import android.widget.Switch;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -51,6 +53,7 @@ public class TempHoneywellActivity extends AppCompatActivity {
     private LoadToast setTempToast;
     private View viewHoneywell;
     private DiscreteSeekBar discreteSeekBarTargetTemp;
+    private int myParticleDeviceAcquireCounter = 0;
 
 
     @Override
@@ -130,90 +133,6 @@ public class TempHoneywellActivity extends AppCompatActivity {
 
     }
 
-
-
-
-    private void setTemperature(final String targetTempRAW){
-        if (myParticleDevice != null){
-
-            setTempToast.show();
-            Async.executeAsync(myParticleDevice, new Async.ApiWork<io.particle.android.sdk.cloud.ParticleDevice, Integer>() {
-
-                @Override
-                public Integer callApi(io.particle.android.sdk.cloud.ParticleDevice particleDevice) throws ParticleCloudException, IOException {
-                    Integer success = 0;
-
-                    //the commands in functionCommandList will be executed by the Particle device
-                    ArrayList<String> functionCommandList = new ArrayList<>();
-                    functionCommandList.add(targetTempRAW);
-
-                    try {
-                        success = particleDevice.callFunction("setTempHoney",functionCommandList);
-
-                    } catch (io.particle.android.sdk.cloud.ParticleDevice.FunctionDoesNotExistException e) {
-                        Snackbar snackbarError = Snackbar
-                                .make(viewHoneywell, e.getMessage(), Snackbar.LENGTH_LONG);
-                        snackbarError.show();
-
-                    }
-
-                    return success;
-                }
-
-
-                public void onSuccess(Integer returnValue) {
-
-                    switch (returnValue){
-                        case 1:
-                            setTempToast.success();
-                            break;
-                        case -1:
-                            Snackbar snackbarError1 = Snackbar
-                                    .make(viewHoneywell, getString(R.string.wrong_response), Snackbar.LENGTH_LONG);
-                            snackbarError1.show();
-                            setTempToast.error();
-                            break;
-                        case -2:
-                            Snackbar snackbarError2 = Snackbar
-                                    .make(viewHoneywell, getString(R.string.read_buffer_overflow), Snackbar.LENGTH_LONG);
-                            snackbarError2.show();
-                            setTempToast.error();
-                            break;
-                        case -3:
-                            Snackbar snackbarError3 = Snackbar
-                                    .make(viewHoneywell, getString(R.string.time_out), Snackbar.LENGTH_LONG);
-                            snackbarError3.show();
-                            setTempToast.error();
-                            break;
-                        default:
-                            setTempToast.error();
-                            break;
-                    }
-
-                    //recyclerView.getAdapter().notifyDataSetChanged();
-                }
-
-                public void onFailure(ParticleCloudException e) {
-                    Log.e("SOME_TAG", e.getBestMessage());
-                    Snackbar snackbarError = Snackbar
-                            .make(viewHoneywell, e.getBestMessage(), Snackbar.LENGTH_LONG);
-                    snackbarError.show();
-                    setTempToast.error();
-
-                }
-
-            });
-        }
-        else {
-            Snackbar snackbarWait = Snackbar
-                    .make(viewHoneywell, "Wait a sec!", Snackbar.LENGTH_LONG);
-            snackbarWait.show();
-        }
-
-
-
-    }
-
     private void setTextSwitchTemperature (String temperatureValue) {
 
         if (temperatureValue.equals(getString(R.string.LOWEST_TEMPERATURE_SELECTION_VALUE))){
@@ -229,17 +148,36 @@ public class TempHoneywellActivity extends AppCompatActivity {
 
     }
 
-    private void setFutureTemperature(String targetFutureTemp, long diffMiliseconds){
+    private void setTemperature(String targetTemp, long diffMiliseconds){
 
         int minutesTillHeatingStart;
-        String delimeter = ";";
-
-        minutesTillHeatingStart = (int)Math.ceil((double)diffMiliseconds / 60000);
-
-        final String command = targetFutureTemp + delimeter
-                + String.valueOf(minutesTillHeatingStart) + delimeter;
+        String cmd;
+        final String delimeterAutomaticFlag = ",";
+        final String delimeterFutureTemp = ";";
 
         if (myParticleDevice != null){
+
+            myParticleDeviceAcquireCounter = 0;
+
+            Switch autoSwitch = (Switch) findViewById(R.id.swt_honeywellAutomatic);
+            final String autoSwitchStatus = autoSwitch.isChecked() ? "A" : "M";
+
+            if(diffMiliseconds <= 0){
+
+                cmd = targetTemp + delimeterAutomaticFlag + autoSwitchStatus;
+
+            }
+            else{
+
+                minutesTillHeatingStart = (int)Math.ceil((double)diffMiliseconds / 60000);
+
+                cmd = targetTemp + delimeterAutomaticFlag + autoSwitchStatus +
+                        delimeterFutureTemp + String.valueOf(minutesTillHeatingStart) + delimeterFutureTemp;
+            }
+
+            // set variables to final
+            final String commandFinal = cmd;
+            final long diffFinal = diffMiliseconds;
 
             setTempToast.show();
             Async.executeAsync(myParticleDevice, new Async.ApiWork<io.particle.android.sdk.cloud.ParticleDevice, Integer>() {
@@ -250,10 +188,13 @@ public class TempHoneywellActivity extends AppCompatActivity {
 
                     //the commands in functionCommandList will be executed by the Particle device
                     ArrayList<String> functionCommandList = new ArrayList<>();
-                    functionCommandList.add(command);
+                    functionCommandList.add(commandFinal);
+
+                    String functionName = (diffFinal <= 0) ? "setTempHoney" : "setTempFut";
 
                     try {
-                        success = particleDevice.callFunction("setTempFut",functionCommandList);
+
+                        success = particleDevice.callFunction(functionName,functionCommandList);
 
                     } catch (io.particle.android.sdk.cloud.ParticleDevice.FunctionDoesNotExistException e) {
                         Snackbar snackbarError = Snackbar
@@ -264,7 +205,6 @@ public class TempHoneywellActivity extends AppCompatActivity {
 
                     return success;
                 }
-
 
                 public void onSuccess(Integer returnValue) {
 
@@ -310,14 +250,24 @@ public class TempHoneywellActivity extends AppCompatActivity {
             });
         }
         else {
-            Snackbar snackbarWait = Snackbar
-                    .make(viewHoneywell, "Wait a sec!", Snackbar.LENGTH_LONG);
-            snackbarWait.show();
+            if (myParticleDeviceAcquireCounter < 5)
+            {
+                myParticleDeviceAcquireCounter++;
+                Snackbar snackbarWait = Snackbar
+                        .make(viewHoneywell, "Wait a sec!", Snackbar.LENGTH_LONG);
+                snackbarWait.show();
+
+                final String tft= targetTemp;
+                final long dM = diffMiliseconds;
+
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    public void run() {
+                        setTemperature(tft, dM);
+                    }
+                }, 1000);
+            }
         }
-
-
-
-
 
     }
 
@@ -357,10 +307,10 @@ public class TempHoneywellActivity extends AppCompatActivity {
             //int targetTempRaw = Math.round(targetTemp_f * 10);
 
             if (targetTemp.equals(getString(R.string.LOWEST_TEMPERATURE_SELECTION_VALUE))) {
-                setTemperature(getString(R.string.HONEYWELL_OFF_VALUE));                                   //value to set Honeywell to OFF
+                setTemperature(getString(R.string.HONEYWELL_OFF_VALUE), 0);                                   //value to set Honeywell to OFF
             }
             else {
-                setTemperature(targetTemp + "0");                                                          //multiple 10 for RAW value == add a zero
+                setTemperature(targetTemp + "0", 0);                                                          //multiple 10 for RAW value == add a zero
             }
 
 
@@ -375,7 +325,7 @@ public class TempHoneywellActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             String lowestValue = getString(R.string.LOWEST_TEMPERATURE_SELECTION_VALUE);
-            setTemperature(getString(R.string.HONEYWELL_OFF_VALUE));
+            setTemperature(getString(R.string.HONEYWELL_OFF_VALUE), 0);
             setTextSwitchTemperature(lowestValue);                         //value to set Honeywell to OFF
             discreteSeekBarTargetTemp.setProgress(Integer.valueOf(lowestValue));
         }
@@ -386,7 +336,7 @@ public class TempHoneywellActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             String comfortValue = SharedPref.getString(getString(R.string.pref_comfort_key), "");
-            setTemperature(comfortValue + "0");               //multiple 10 for RAW value == add a zero
+            setTemperature(comfortValue + "0", 0);               //multiple 10 for RAW value == add a zero
             setTextSwitchTemperature(comfortValue);
             discreteSeekBarTargetTemp.setProgress(Integer.valueOf(comfortValue));
 
@@ -427,7 +377,7 @@ public class TempHoneywellActivity extends AppCompatActivity {
                             Calendar calenderInstance = new GregorianCalendar(selectedyear,
                                     selectedmonth, selectedday, selectedHour, selectedMinute);
                             long selectedUnixTimeStamp = calenderInstance.getTimeInMillis();
-                            setFutureTemperature(targetTempStr, selectedUnixTimeStamp - currentUnixTimestamp);
+                            setTemperature(targetTempStr, selectedUnixTimeStamp - currentUnixTimestamp);
                         }
                     }, hour, minute, true);//Yes 24 hour time
                     mTimePicker.setTitle("Select Heat Start Time");
@@ -448,7 +398,7 @@ public class TempHoneywellActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             String nightValue = SharedPref.getString(getString(R.string.pref_night_key), "");
-            setTemperature(nightValue + "0");                 //multiple 10 for RAW value == add a zero
+            setTemperature(nightValue + "0", 0);                 //multiple 10 for RAW value == add a zero
             setTextSwitchTemperature(nightValue);
             discreteSeekBarTargetTemp.setProgress(Integer.valueOf(nightValue));
         }
