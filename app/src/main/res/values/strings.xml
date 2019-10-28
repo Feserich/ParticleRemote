@@ -122,7 +122,6 @@
         <item>Switch Relays</item>
         <item><![CDATA[Read temperature & humidity]]></item>
         <item>Set Honeywell temperature</item>
-        <item>Send messages with MQTT protocol </item>
     </string-array>
 
     <string name="wrong_command">Wrong command</string>

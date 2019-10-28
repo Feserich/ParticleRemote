@@ -235,7 +235,8 @@ public class MainActivity extends AppCompatActivity {
         final MaterialSimpleListAdapter adapter = new MaterialSimpleListAdapter(new MaterialSimpleListAdapter.Callback() {
             @Override
             public void onMaterialListItemSelected(MaterialDialog dialog, int index, MaterialSimpleListItem item) {
-                switch (index) {
+                Integer function = device.availableFunctions[index];
+                switch (function) {
                     case 0:
                         Intent intentRelay = new Intent(MainActivity.this, RelayScrollingActivity.class);
                         intentRelay.putExtra("deviceID", device.deviceID);
@@ -252,12 +253,6 @@ public class MainActivity extends AppCompatActivity {
                         Intent intentTempHoneywell = new Intent(MainActivity.this, TempHoneywellActivity.class);
                         intentTempHoneywell.putExtra("deviceID", device.deviceID);
                         MainActivity.this.startActivity(intentTempHoneywell);
-                        dialog.dismiss();
-                        break;
-                    case 3:
-                        Snackbar snackbarInfo = Snackbar
-                                .make(rv, "Comming soon...", Snackbar.LENGTH_LONG);
-                        snackbarInfo.show();
                         dialog.dismiss();
                         break;
 
@@ -297,14 +292,6 @@ public class MainActivity extends AppCompatActivity {
                             .build());
                     break;
 
-                case 3:
-                    //send commands over MQTT-protocol
-                    adapter.add(new MaterialSimpleListItem.Builder(this)
-                            .content(particleFunctionArray[3])
-                            .icon(R.drawable.ic_access_point_grey600_48dp)
-                            .backgroundColor(Color.WHITE)
-                            .build());
-                    break;
             }
         }
 
