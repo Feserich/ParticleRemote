@@ -39,6 +39,7 @@ import java.util.List;
 import io.particle.android.sdk.cloud.*;
 import io.particle.android.sdk.cloud.ParticleDevice;
 import io.particle.android.sdk.utils.Async;
+import io.particle.android.sdk.cloud.exceptions.ParticleCloudException;
 
 
 public class RelayScrollingActivity extends AppCompatActivity {
@@ -84,7 +85,7 @@ public class RelayScrollingActivity extends AppCompatActivity {
 
     }
 
-    private void toggleRelay(final Relay relay){
+    private void toggleRelay(final Relay relay) throws ParticleCloudException {
 
         if (myParticleDevice != null){
             relay.tryToSwitch = true;
@@ -262,7 +263,11 @@ public class RelayScrollingActivity extends AppCompatActivity {
 
                     @Override
                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                        toggleRelay(relay);
+                        try {
+                            toggleRelay(relay);
+                        } catch (ParticleCloudException e) {
+                            e.printStackTrace();
+                        }
                     }
                 })
                 .show();
@@ -424,7 +429,7 @@ public class RelayScrollingActivity extends AppCompatActivity {
 
         RVadapterRelay.RelayViewHolder.setOnItemClickListener(new RVadapterRelay.OnItemClickListener() {
             @Override
-            public void onItemClicked(String pin) {
+            public void onItemClicked(String pin) throws ParticleCloudException {
                 for (Relay relay: listRelays){
                     if (relay.pin.equals(pin)){
                         if (relay.switchConfirmation) {showConfirmationPopup(relay);}

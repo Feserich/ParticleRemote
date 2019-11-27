@@ -10,6 +10,8 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import io.particle.android.sdk.cloud.exceptions.ParticleCloudException;
+
 /**
  * Created by Fabian on 23.03.2016.
  */
@@ -36,7 +38,7 @@ class Relay {
 public class RVadapterRelay extends RecyclerView.Adapter<RVadapterRelay.RelayViewHolder> {
 
     public interface OnItemClickListener {
-        void onItemClicked(String pin);
+        void onItemClicked(String pin) throws ParticleCloudException;
     }
 
     public interface OnItemLongClickListener {
@@ -119,7 +121,11 @@ public class RVadapterRelay extends RecyclerView.Adapter<RVadapterRelay.RelayVie
                 public void onClick(View itemView) {
                     if (mItemClickListener != null) {
                         final String pin = relayPin.getText().toString();
-                        mItemClickListener.onItemClicked(pin);
+                        try {
+                            mItemClickListener.onItemClicked(pin);
+                        } catch (ParticleCloudException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             });

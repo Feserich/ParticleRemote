@@ -27,7 +27,7 @@ import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
-import org.joda.time.format.DateTimeFormatter;
+//import org.joda.time.format.DateTimeFormatter;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -40,6 +40,7 @@ import java.util.Locale;
 import io.particle.android.sdk.cloud.*;
 import io.particle.android.sdk.cloud.ParticleDevice;
 import io.particle.android.sdk.utils.Async;
+import io.particle.android.sdk.cloud.exceptions.ParticleCloudException;
 
 
 public class TempHumiActivity extends AppCompatActivity {

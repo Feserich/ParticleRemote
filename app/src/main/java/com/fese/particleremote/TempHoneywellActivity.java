@@ -35,7 +35,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import io.particle.android.sdk.cloud.ParticleCloud;
-import io.particle.android.sdk.cloud.ParticleCloudException;
+import io.particle.android.sdk.cloud.exceptions.ParticleCloudException;
 import io.particle.android.sdk.cloud.ParticleCloudSDK;
 import io.particle.android.sdk.cloud.ParticleDevice;
 import io.particle.android.sdk.utils.Async;
@@ -148,7 +148,7 @@ public class TempHoneywellActivity extends AppCompatActivity {
 
     }
 
-    private void setTemperature(String targetTemp, long diffMiliseconds){
+    private void setTemperature(String targetTemp, long diffMiliseconds) throws ParticleCloudException {
 
         int minutesTillHeatingStart;
         String cmd;
@@ -263,7 +263,11 @@ public class TempHoneywellActivity extends AppCompatActivity {
                 Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {
                     public void run() {
-                        setTemperature(tft, dM);
+                        try {
+                            setTemperature(tft, dM);
+                        } catch (ParticleCloudException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }, 1000);
             }
@@ -307,10 +311,18 @@ public class TempHoneywellActivity extends AppCompatActivity {
             //int targetTempRaw = Math.round(targetTemp_f * 10);
 
             if (targetTemp.equals(getString(R.string.LOWEST_TEMPERATURE_SELECTION_VALUE))) {
-                setTemperature(getString(R.string.HONEYWELL_OFF_VALUE), 0);                                   //value to set Honeywell to OFF
+                try {
+                    setTemperature(getString(R.string.HONEYWELL_OFF_VALUE), 0);                                   //value to set Honeywell to OFF
+                } catch (ParticleCloudException e) {
+                    e.printStackTrace();
+                }
             }
             else {
-                setTemperature(targetTemp + "0", 0);                                                          //multiple 10 for RAW value == add a zero
+                try {
+                    setTemperature(targetTemp + "0", 0);                                                          //multiple 10 for RAW value == add a zero
+                } catch (ParticleCloudException e) {
+                    e.printStackTrace();
+                }
             }
 
 
@@ -325,7 +337,11 @@ public class TempHoneywellActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             String lowestValue = getString(R.string.LOWEST_TEMPERATURE_SELECTION_VALUE);
-            setTemperature(getString(R.string.HONEYWELL_OFF_VALUE), 0);
+            try {
+                setTemperature(getString(R.string.HONEYWELL_OFF_VALUE), 0);
+            } catch (ParticleCloudException e) {
+                e.printStackTrace();
+            }
             setTextSwitchTemperature(lowestValue);                         //value to set Honeywell to OFF
             discreteSeekBarTargetTemp.setProgress(Integer.valueOf(lowestValue));
         }
@@ -336,7 +352,11 @@ public class TempHoneywellActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             String comfortValue = SharedPref.getString(getString(R.string.pref_comfort_key), "");
-            setTemperature(comfortValue + "0", 0);               //multiple 10 for RAW value == add a zero
+            try {
+                setTemperature(comfortValue + "0", 0);               //multiple 10 for RAW value == add a zero
+            } catch (ParticleCloudException e) {
+                e.printStackTrace();
+            }
             setTextSwitchTemperature(comfortValue);
             discreteSeekBarTargetTemp.setProgress(Integer.valueOf(comfortValue));
 
@@ -377,7 +397,11 @@ public class TempHoneywellActivity extends AppCompatActivity {
                             Calendar calenderInstance = new GregorianCalendar(selectedyear,
                                     selectedmonth, selectedday, selectedHour, selectedMinute);
                             long selectedUnixTimeStamp = calenderInstance.getTimeInMillis();
-                            setTemperature(targetTempStr, selectedUnixTimeStamp - currentUnixTimestamp);
+                            try {
+                                setTemperature(targetTempStr, selectedUnixTimeStamp - currentUnixTimestamp);
+                            } catch (ParticleCloudException e) {
+                                e.printStackTrace();
+                            }
                         }
                     }, hour, minute, true);//Yes 24 hour time
                     mTimePicker.setTitle("Select Heat Start Time");
@@ -398,7 +422,11 @@ public class TempHoneywellActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             String nightValue = SharedPref.getString(getString(R.string.pref_night_key), "");
-            setTemperature(nightValue + "0", 0);                 //multiple 10 for RAW value == add a zero
+            try {
+                setTemperature(nightValue + "0", 0);                 //multiple 10 for RAW value == add a zero
+            } catch (ParticleCloudException e) {
+                e.printStackTrace();
+            }
             setTextSwitchTemperature(nightValue);
             discreteSeekBarTargetTemp.setProgress(Integer.valueOf(nightValue));
         }

@@ -141,6 +141,10 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.DeviceViewHolder> 
                 deviceViewHolder.model.setText("Electron");
                 deviceViewHolder.devicePhoto.setImageResource(R.drawable.electron_vector);
                 break;
+            case "RASPBERRY_PI":
+                deviceViewHolder.model.setText("Raspberry Pi");
+                deviceViewHolder.devicePhoto.setImageResource(R.drawable.raspberry_pi);
+                break;
             case "CORE":
                 deviceViewHolder.model.setText("Core");
                 deviceViewHolder.devicePhoto.setImageResource(R.drawable.core_vector);
