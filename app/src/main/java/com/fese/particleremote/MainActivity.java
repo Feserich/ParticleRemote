@@ -112,10 +112,6 @@ public class MainActivity extends AppCompatActivity {
                                     showDeviceRenameDialog(device);
                                     break;
                                 case R.id.menu_hide_device:
-                                    //TODO: find a method to hide specific devices in the RV
-                                    Snackbar snackbarInfo = Snackbar
-                                            .make(rv, "TODO", Snackbar.LENGTH_LONG);
-                                    snackbarInfo.show();
                                     device.hideDevice = true;
                                     rv.getAdapter().notifyDataSetChanged();
                                     break;
@@ -320,7 +316,6 @@ public class MainActivity extends AppCompatActivity {
         //store this Json string in Shared Preferences
         prefsEditor.putString(getString(R.string.saved_particle_device_shared_pref_key), json);
         prefsEditor.apply();
-
     }
 
     private void loadDeviceList(){

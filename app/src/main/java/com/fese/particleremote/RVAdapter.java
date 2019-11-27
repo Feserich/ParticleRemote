@@ -120,10 +120,27 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.DeviceViewHolder> 
 
     @Override
     public void onBindViewHolder(final RVAdapter.DeviceViewHolder deviceViewHolder, final int i) {
-        deviceViewHolder.deviceName.setText(devices.get(i).deviceName);
-        deviceViewHolder.deviceID.setText("ID: " + devices.get(i).deviceID);
+        int idxTemp = 0;
+        int cnt = 0;
 
-        if (devices.get(i).isConnected){
+        // only show unhidden devices. Not the best solution...
+        for (int idx=0; idx<devices.size();idx++)
+        {
+            if(devices.get(idx).hideDevice == false)
+            {
+                if (cnt == i)
+                {
+                    idxTemp = idx;
+                }
+                cnt++;
+            }
+        }
+        final int index = idxTemp;
+
+        deviceViewHolder.deviceName.setText(devices.get(index).deviceName);
+        deviceViewHolder.deviceID.setText("ID: " + devices.get(index).deviceID);
+
+        if (devices.get(index).isConnected){
             deviceViewHolder.statusLED.setImageResource(R.drawable.online_dot);
             deviceViewHolder.status.setText("Online");
         }
@@ -132,7 +149,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.DeviceViewHolder> 
             deviceViewHolder.status.setText("Offline");
         }
 
-        switch (devices.get(i).model) {
+        switch (devices.get(index).model) {
             case "PHOTON":
                 deviceViewHolder.model.setText("Photon");
                 deviceViewHolder.devicePhoto.setImageResource(R.drawable.photon_vector);
@@ -150,14 +167,14 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.DeviceViewHolder> 
                 deviceViewHolder.devicePhoto.setImageResource(R.drawable.core_vector);
                 break;
             default:
-                deviceViewHolder.model.setText(devices.get(i).model);
+                deviceViewHolder.model.setText(devices.get(index).model);
         }
 
 
         deviceViewHolder.ib_device_menu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showPopupMenu(deviceViewHolder.ib_device_menu, devices.get(i).deviceID);
+                showPopupMenu(deviceViewHolder.ib_device_menu, devices.get(index).deviceID);
             }
         });
 
@@ -165,7 +182,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.DeviceViewHolder> 
             @Override public void onClick(View itemView){
 
                 if (mParticleClickListener != null) {
-                    mParticleClickListener.onParticleDeviceClicked(devices.get(i).deviceID);
+                    mParticleClickListener.onParticleDeviceClicked(devices.get(index).deviceID);
 
                 }
             }
@@ -198,7 +215,17 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.DeviceViewHolder> 
 
     @Override
     public int getItemCount() {
-        return devices.size();
+        int cnt = 0;
+
+        for(MyParticleDevice device : devices)
+        {
+            if(device.hideDevice == false)
+            {
+                cnt++;
+            }
+        }
+
+        return cnt;
     }
 }
 
