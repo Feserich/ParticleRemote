@@ -61,8 +61,6 @@ public class TempHoneywellActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_temp_honeywell);
 
-        targetTemp = getString(R.string.LOWEST_TEMPERATURE_SELECTION_VALUE);
-
         Toolbar toolbar = findViewById(R.id.app_bar);
         setSupportActionBar(toolbar);
 
@@ -120,8 +118,6 @@ public class TempHoneywellActivity extends AppCompatActivity {
             }
         });
 
-        discreteSeekBarTargetTemp.setMin(Integer.valueOf(getString(R.string.LOWEST_TEMPERATURE_SELECTION_VALUE)));
-        discreteSeekBarTargetTemp.setMax(Integer.valueOf(getString(R.string.HIGHEST_TEMPERATURE_SELECTION_VALUE)));
 
 
 
@@ -130,6 +126,7 @@ public class TempHoneywellActivity extends AppCompatActivity {
         ParticleCloudSDK.init(this);
         getParticleDeviceInstance();
         setTextSwitchTemperature(getString(R.string.LOWEST_TEMPERATURE_SELECTION_VALUE));
+        targetTemp = getString(R.string.LOWEST_TEMPERATURE_SELECTION_VALUE);
 
     }
 
