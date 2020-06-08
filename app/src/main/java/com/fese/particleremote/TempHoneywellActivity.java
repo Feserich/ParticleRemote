@@ -56,7 +56,7 @@ public class TempHoneywellActivity extends AppCompatActivity {
 
     private int myParticleDeviceAcquireCounter = 0;
     final android.os.Handler handler = new android.os.Handler();
-    private static final String lastHoneywellCmdStr = "lastHoneyCmd";
+    private static final String lastHoneywellCmdStr = "lastCmd";
     String lastCmd = "";
     final String delimeterAutomaticFlag = ",";
     final String delimeterFutureTemp = ";";
