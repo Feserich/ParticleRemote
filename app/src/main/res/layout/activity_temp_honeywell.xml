@@ -99,6 +99,7 @@
         android:layout_below="@id/discrete_seekbar_target_temp"
         android:id="@+id/btn_setTargetTemp"
         android:text="@string/set_temperature"
+        android:enabled="false"
         />
 
     <ProgressBar
@@ -129,6 +130,7 @@
             android:layout_height="match_parent"
             android:id="@+id/btn_tempOff"
             android:layout_weight="1"
+            android:enabled="false"
             android:text="@string/off"/>
 
         <Button
@@ -137,6 +139,7 @@
             android:id="@+id/btn_tempComfort"
             android:layout_weight="1"
             android:layout_marginStart="16dp"
+            android:enabled="false"
             android:text="@string/comfort"/>
 
         <Button
@@ -145,6 +148,7 @@
             android:id="@+id/btn_tempNight"
             android:layout_weight="1"
             android:layout_marginStart="16dp"
+            android:enabled="false"
             android:text="@string/night_mode"/>
 
     </LinearLayout>
@@ -169,6 +173,7 @@
                 android:id="@+id/btn_setFutureTemp"
                 android:text="@string/future_temperature"
                 android:layout_marginStart="16dp"
+                android:enabled="false"
                 />
 
 

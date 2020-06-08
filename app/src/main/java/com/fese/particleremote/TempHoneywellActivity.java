@@ -53,7 +53,14 @@ public class TempHoneywellActivity extends AppCompatActivity {
     private LoadToast setTempToast;
     private View viewHoneywell;
     private DiscreteSeekBar discreteSeekBarTargetTemp;
+
     private int myParticleDeviceAcquireCounter = 0;
+    final android.os.Handler handler = new android.os.Handler();
+    private static final String lastHoneywellCmdStr = "lastHoneyCmd";
+    String lastCmd = "";
+    final String delimeterAutomaticFlag = ",";
+    final String delimeterFutureTemp = ";";
+
 
 
     @Override
@@ -127,7 +134,96 @@ public class TempHoneywellActivity extends AppCompatActivity {
         getParticleDeviceInstance();
         setTextSwitchTemperature(getString(R.string.LOWEST_TEMPERATURE_SELECTION_VALUE));
         targetTemp = getString(R.string.LOWEST_TEMPERATURE_SELECTION_VALUE);
+        setDefaultValuesFromLastCmd();
+    }
 
+    private void setDefaultValuesFromLastCmd () {
+
+        if (myParticleDevice != null) {
+            Async.executeAsync(ParticleCloudSDK.getCloud(), new Async.ApiWork<ParticleCloud, Boolean>() {
+
+                @Override
+                public Boolean callApi(ParticleCloud particleCloud) throws ParticleCloudException, IOException {
+                    boolean success = false;
+
+                    try {
+                        lastCmd = myParticleDevice.getStringVariable(lastHoneywellCmdStr);
+                        success = true;
+                    }
+
+                    catch (ParticleDevice.VariableDoesNotExistException e){
+                        //Log.e("SOME_TAG", e.getMessage().toString());
+                        Snackbar snackbarError = Snackbar
+                                .make(viewHoneywell, e.getMessage(), Snackbar.LENGTH_LONG);
+                        snackbarError.show();
+                    }
+
+                    return success;
+                }
+
+                public void onSuccess(Boolean onSuccess) {
+                    if (onSuccess){
+                        //addTempHumiValueToChart((float) temperatureVal, (float) humidityVal, refresh_cycle/1000);
+                        if (! lastCmd.equals(""))
+                        {
+                            String[] lastCmdArray = lastCmd.split(delimeterAutomaticFlag);
+                            if(lastCmdArray[0].equals(getString(R.string.HONEYWELL_OFF_VALUE))){
+                                setTextSwitchTemperature(getString(R.string.LOWEST_TEMPERATURE_SELECTION_VALUE));
+                                targetTemp = getString(R.string.LOWEST_TEMPERATURE_SELECTION_VALUE);
+                                discreteSeekBarTargetTemp.setProgress(Integer.valueOf(targetTemp));
+                            }
+                            else {
+                                // remove last char
+                                targetTemp = lastCmdArray[0].substring(0, lastCmdArray[0].length() - 1);
+                                setTextSwitchTemperature(targetTemp);
+                                discreteSeekBarTargetTemp.setProgress(Integer.valueOf(targetTemp));
+                            }
+
+                            Switch autoSwitch = (Switch) findViewById(R.id.swt_honeywellAutomatic);
+                            if(lastCmdArray[1].equals("M")){
+                                autoSwitch.setChecked(false);
+                            }
+                            else if(lastCmdArray[1].equals("A")){
+                                autoSwitch.setChecked(true);
+                            }
+                        }
+                    }
+                    enableAllButtons();
+                }
+
+                public void onFailure(ParticleCloudException e) {
+                    Log.e("SOME_TAG", e.getBestMessage());
+                    Snackbar snackbarError = Snackbar
+                            .make(viewHoneywell, e.getBestMessage(), Snackbar.LENGTH_LONG);
+                    snackbarError.show();
+
+                    enableAllButtons();
+                }
+            });
+
+        }
+        else {
+            handler.postDelayed(new Runnable() {
+                public void run() {
+                    setDefaultValuesFromLastCmd();
+                }
+            }, 500);
+        }
+    }
+
+    private void enableAllButtons()
+    {
+        Button btn_setTemp = findViewById(R.id.btn_setTargetTemp);
+        Button btn_setTempOff = findViewById(R.id.btn_tempOff);
+        Button btn_setTempComfort = findViewById(R.id.btn_tempComfort);
+        Button btn_setTempNight = findViewById(R.id.btn_tempNight);
+        Button btn_setFutureTemp = findViewById(R.id.btn_setFutureTemp);
+
+        btn_setTemp.setEnabled(true);
+        btn_setTempOff.setEnabled(true);
+        btn_setTempComfort.setEnabled(true);
+        btn_setTempNight.setEnabled(true);
+        btn_setFutureTemp.setEnabled(true);
     }
 
     private void setTextSwitchTemperature (String temperatureValue) {
@@ -149,8 +245,6 @@ public class TempHoneywellActivity extends AppCompatActivity {
 
         int minutesTillHeatingStart;
         String cmd;
-        final String delimeterAutomaticFlag = ",";
-        final String delimeterFutureTemp = ";";
 
         if (myParticleDevice != null){
 
